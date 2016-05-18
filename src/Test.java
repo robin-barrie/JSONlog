@@ -1,20 +1,28 @@
 
  
+import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
  
  
 public class Test {
 	
+	public static File f;
 	public static StringBuilder builder = new StringBuilder();
+	public static FileWriter fw_file;
+	public static BufferedWriter bw_file;
+
+	
 	
 	
 	public static void main(String[] args)  {
 		
-	
+		initSB();
 		IOInfoSB();
 		TEST2stateSB();
 		finalStateSB();
+		//closeSB();
 			
 	}
 	
@@ -59,20 +67,81 @@ public class Test {
 		
 	}
 	
+	public static void initSB() {
+					
+    	try {
+    		f = new File("/Users/Robin/Documents/file3.txt");
+    		if(!f.exists()){
+    			f.createNewFile();
+    		}
+			fw_file = new FileWriter(f);
+		} catch (IOException e) {
+			System.err.println("Caught IOException (init fw): " + e.getMessage());
+		}
+    	bw_file = new BufferedWriter(fw_file);
+    	
+		try  {
+			bw_file.write(builder.toString());
+			System.out.println("Successfully Copied INIT String to File...");
+			System.out.println("builder string: \n" + builder);
+		}catch (IOException e) {
+		    System.err.println("Caught IOException (init bw): " + e.getMessage());
+		}
+/*
+		try (fw_file = new FileWriter("/Users/Robin/Documents/file3.txt")) {
+			bw_file = new BufferedWriter(fw_file);
+			bw_file.write(builder.toString());
+			System.out.println("Successfully Copied INIT String to File...");
+			System.out.println("builder string: \n" + builder);
+		}catch (IOException e) {
+		    System.err.println("Caught IOException (init): " + e.getMessage());
+		}	
+*/
+	}
+	
+	public static void closeSB() {
+		 try{
+			if(bw_file!=null)
+			 bw_file.close();
+			System.out.println("Successfully Closed state String to File...");
+			System.out.println("builder string: \n" + builder);
+		   	}catch(Exception ex){
+		       System.out.println("Error in closing the BufferedWriter"+ex);
+		    }
+	}
 	
 	public static void finalStateSB() {
 		builder.setLength(Math.max(builder.length() - 1,0));  	//remove comma from last entry.
-		builder.append("\t] \n}");								// close out JSON format
+		builder.append("\n\t] \n}");								// close out JSON format
  
+		 try{
+			if(bw_file!=null)
+			 bw_file.close();
+			System.out.println("Successfully Closed state String to File...");
+			System.out.println("builder string: \n" + builder);
+		   	}catch(Exception ex){
+		       System.out.println("Error in closing the BufferedWriter"+ex);
+		    }
+		
 		// try
+		/*
 		try (FileWriter file = new FileWriter("/Users/Robin/Documents/file3.txt")) {
 			file.write(builder.toString());
 			System.out.println("Successfully Copied state String to File...");
 			System.out.println("builder string: \n" + builder);
 		}catch (IOException e) {
 		    System.err.println("Caught IOException (ioinfo): " + e.getMessage());
-		}	
-		
+		}
+		*/
+		 /*
+		try  {
+			bw_file.write(builder.toString());
+			System.out.println("Successfully Copied final String to File...");
+			System.out.println("builder string: \n" + builder);
+		}catch (IOException e) {
+		    System.err.println("Caught IOException (final): " + e.getMessage());
+		}
+		*/
 	}
 		
 	
@@ -146,10 +215,10 @@ public class Test {
 		builder.append("\n\t\t] },");							//close out state entry.
 		
 		
-		builder.append("\t{\"timestamp\":\"");
+		builder.append("\n\t{\"timestamp\":\"");
 		builder.append("1463365197334");
 		//builder.append(System.currentTimeMillis());
-		builder.append("\",\"values\":[\n");
+		builder.append("\",\"values\":[");
 		addStateBoolean("button1","driver-button1",false);   //use getMethod instead of 'true/false' for value....
 		addStateBoolean("button2","driver-button2",false);
 		addStateBoolean("button4","driver-button4",false);
@@ -157,10 +226,10 @@ public class Test {
 		builder.setLength(Math.max(builder.length() - 1,0));  	//remove comma from last entry.
 		builder.append("\n\t\t] },");							//close out state entry.
 			
-		builder.append("\t{\"timestamp\":\"");
+		builder.append("\n\t{\"timestamp\":\"");
 		builder.append("1463365197344");
 		//builder.append(System.currentTimeMillis());
-		builder.append("\",\"values\":[\n");
+		builder.append("\",\"values\":[");
 		addStateBoolean("button1","driver-button1",true);   //use getMethod instead of 'true/false' for value....
 		addStateBoolean("button2","driver-button2",true);
 		addStateBoolean("button4","driver-button4",true);	
