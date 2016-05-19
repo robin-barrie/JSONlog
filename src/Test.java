@@ -66,11 +66,12 @@ public class Test {
 		//PRINT FILE EVERY TIME?????
 		
 	}
-	
+
 	public static void initSB() {
 					
     	try {
-    		f = new File("/Users/Robin/Documents/file3.txt");
+    		//f = new File("/Users/Robin/Documents/file3.txt");
+    		f = new File("/Users/EngiNERD1/Documents/file" + System.currentTimeMillis() + ".txt");
     		if(!f.exists()){
     			f.createNewFile();
     		}
