@@ -22,14 +22,48 @@ public class Test {
 		IOInfoSB();
 		TEST2stateSB();
 		finalStateSB();
-		//closeSB();
+		closeSB();
 			
 	}
-	
+
+	/*
+	 *	Creates time stamped file and initiates buffer writer to that file. (ok)
+	 * 
+	 */
+	public static void initSB() {
+					
+    	try {
+    		f = new File("/Users/Public/Documents/file" + System.currentTimeMillis() + ".txt");
+    		if(!f.exists()){
+    			f.createNewFile();
+    		}
+			fw_file = new FileWriter(f);
+		} catch (IOException e) {
+			System.err.println("Caught IOException (init fw): " + e.getMessage());
+		}
+    	bw_file = new BufferedWriter(fw_file);
+    	
+		try  {
+			bw_file.write(builder.toString());
+			System.out.println("Successfully Created File..."+f);
+		}catch (IOException e) {
+		    System.err.println("Caught IOException (init bw): " + e.getMessage());
+		}
+	}	
+
+	/*
+	 *	IOInfo:
+	 *	Initial entry that defines what 'can' be logged later
+	 */
 	public static void IOInfoSB() {
 		
-		//'name' to match name in 'state' section.  'direction' = Input/Output.  All others for information only.
-		// Add a line for every item to be logged.  Last entry has a unique ending
+		//'name' (1st item) to match name in 'state' section.  
+		// 'direction'  (4th item)= Input/Output only.  
+		// The 2nd and 4th item are just for information( i.e type and then port).
+		// Add a line for every item to be logged.  
+		// Last entry has a unique ending
+		//
+		//  Maybe in future, read in details from an array, gaurantees names match and only one place to edit
 		
 		builder.append("{\"ioinfo\":[");
 		
@@ -67,43 +101,21 @@ public class Test {
 		
 	}
 
-	public static void initSB() {
-					
-    	try {
-    		//f = new File("/Users/Robin/Documents/file3.txt");
-    		f = new File("/Users/EngiNERD1/Documents/file" + System.currentTimeMillis() + ".txt");
-    		if(!f.exists()){
-    			f.createNewFile();
-    		}
-			fw_file = new FileWriter(f);
-		} catch (IOException e) {
-			System.err.println("Caught IOException (init fw): " + e.getMessage());
-		}
-    	bw_file = new BufferedWriter(fw_file);
-    	
-		try  {
-			bw_file.write(builder.toString());
-			System.out.println("Successfully Copied INIT String to File...");
-			System.out.println("builder string: \n" + builder);
-		}catch (IOException e) {
-		    System.err.println("Caught IOException (init bw): " + e.getMessage());
-		}
-/*
-		try (fw_file = new FileWriter("/Users/Robin/Documents/file3.txt")) {
-			bw_file = new BufferedWriter(fw_file);
-			bw_file.write(builder.toString());
-			System.out.println("Successfully Copied INIT String to File...");
-			System.out.println("builder string: \n" + builder);
-		}catch (IOException e) {
-		    System.err.println("Caught IOException (init): " + e.getMessage());
-		}	
-*/
-	}
+
 	
 	public static void closeSB() {
+		try  {
+			bw_file.write(builder.toString());
+			bw_file.flush();
+			fw_file.flush();
+			System.out.println("Successfully Flushed File..."+f);
+		}catch (IOException e) {
+		    System.err.println("Caught IOException (closeSB): " + e.getMessage());
+		}
 		 try{
 			if(bw_file!=null)
 			 bw_file.close();
+			 fw_file.close();
 			System.out.println("Successfully Closed state String to File...");
 			System.out.println("builder string: \n" + builder);
 		   	}catch(Exception ex){
@@ -117,8 +129,9 @@ public class Test {
  
 		 try{
 			if(bw_file!=null)
+			bw_file.write(builder.toString());
 			 bw_file.close();
-			System.out.println("Successfully Closed state String to File...");
+			System.out.println("Successfully Closed bw state String to File..(finalStateSB).");
 			System.out.println("builder string: \n" + builder);
 		   	}catch(Exception ex){
 		       System.out.println("Error in closing the BufferedWriter"+ex);
@@ -204,10 +217,10 @@ public class Test {
 		//send boolean thru this method to identify last/final state and then pass to last entry.
 		
 		
-		builder.append("\n\t{\"timestamp\":\"");
-		builder.append("1463365197324");
-		//builder.append("/n\t{\"timestamp\":\"" + System.currentTimeMillis() + "\",\"values\":[");
-		builder.append("\",\"values\":[");
+		//builder.append("\n\t{\"timestamp\":\"");
+		//builder.append("1463365197324");
+		//builder.append("\",\"values\":[");
+		builder.append("\n\t{\"timestamp\":\"" + System.currentTimeMillis() + "\",\"values\":[");
 		addStateBoolean("button1","driver-button1",false);   //use getMethod instead of 'true/false' for value....
 		addStateBoolean("button2","driver-button2",true);
 		addStateBoolean("button4","driver-button4",false);
@@ -215,11 +228,14 @@ public class Test {
 		builder.setLength(Math.max(builder.length() - 1,0));  	//remove comma from last entry.
 		builder.append("\n\t\t] },");							//close out state entry.
 		
+		try{ Thread.sleep(20);
+			} catch (InterruptedException e) {
+			e.printStackTrace();}
 		
-		builder.append("\n\t{\"timestamp\":\"");
-		builder.append("1463365197334");
-		//builder.append(System.currentTimeMillis());
-		builder.append("\",\"values\":[");
+		//builder.append("\n\t{\"timestamp\":\"");
+		//builder.append("1463365197334");
+		//builder.append("\",\"values\":[");
+		builder.append("\n\t{\"timestamp\":\"" + System.currentTimeMillis() + "\",\"values\":[");
 		addStateBoolean("button1","driver-button1",false);   //use getMethod instead of 'true/false' for value....
 		addStateBoolean("button2","driver-button2",false);
 		addStateBoolean("button4","driver-button4",false);
@@ -227,10 +243,14 @@ public class Test {
 		builder.setLength(Math.max(builder.length() - 1,0));  	//remove comma from last entry.
 		builder.append("\n\t\t] },");							//close out state entry.
 			
-		builder.append("\n\t{\"timestamp\":\"");
-		builder.append("1463365197344");
-		//builder.append(System.currentTimeMillis());
-		builder.append("\",\"values\":[");
+		try{ Thread.sleep(20);
+		} catch (InterruptedException e) {
+		e.printStackTrace();}
+
+		//builder.append("\n\t{\"timestamp\":\"");
+		//builder.append("1463365197344");
+		//builder.append("\",\"values\":[");
+		builder.append("\n\t{\"timestamp\":\"" + System.currentTimeMillis() + "\",\"values\":[");
 		addStateBoolean("button1","driver-button1",true);   //use getMethod instead of 'true/false' for value....
 		addStateBoolean("button2","driver-button2",true);
 		addStateBoolean("button4","driver-button4",true);	
@@ -247,8 +267,8 @@ public class Test {
 			builder.append("\"state\":[\n");
 			
 			builder.append("\t{\"timestamp\":\"");
-			builder.append("1463365197324");
-			//builder.append(System.currentTimeMillis());
+			//builder.append("1463365197324");
+			builder.append(System.currentTimeMillis());
 			builder.append("\",\"values\":[\n");
 			builder.append("\t\t{\"name\":\"button1\",\"parent\":\"d-button1\",\"value\":\"");
 			builder.append(false);
@@ -257,16 +277,16 @@ public class Test {
 			builder.append("\t\t{\"name\":\"button4\",\"parent\":\"d-button3\",\"value\":\"true\"}\n \t\t] }, \n"); // ]}, instead of , - on last entry
 			
 			builder.append("\t{\"timestamp\":\"");
-			builder.append("1463365197334");
-			//builder.append(System.currentTimeMillis());
+			//builder.append("1463365197334");
+			builder.append(System.currentTimeMillis());
 			builder.append("\",\"values\":[\n");
 			builder.append("\t\t{\"name\":\"button1\",\"parent\":\"d-button1\",\"value\":\"true\"},\n");		
 			builder.append("\t\t{\"name\":\"button2\",\"parent\":\"d-button2\",\"value\":\"true\"},\n");	
 			builder.append("\t\t{\"name\":\"button4\",\"parent\":\"d-button3\",\"value\":\"true\"}\n \t\t] }, \n");  // ]}, instead of , - on last entry
 				
 			builder.append("\t{\"timestamp\":\"");
-			builder.append("1463365197344");
-			//builder.append(System.currentTimeMillis());
+			//builder.append("1463365197344");
+			builder.append(System.currentTimeMillis());
 			builder.append("\",\"values\":[\n");
 			builder.append("\t\t{\"name\":\"button1\",\"parent\":\"d-button1\",\"value\":\"false\"},\n");		
 			builder.append("\t\t{\"name\":\"button2\",\"parent\":\"d-button2\",\"value\":\"false\"},\n");	
