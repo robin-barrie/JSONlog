@@ -27,7 +27,7 @@ public class Test {
 	//  This includes the two below, as well as IOInfoSB() & stateSB().
 	//***********************************************************************************
 	public static NetworkTableEntry loggerEntry, yawEntry, RightEncoderValueEntry, LeftEncoderValueEntry, 
-	leftChassisPOWEREntry, rightChassisPOWEREntry, turnValueEntry, leftOutputEntry, rightOutputEntry;
+	leftChassisPOWEREntry, rightChassisPOWEREntry, TurnValueEntry, leftOutputEntry, rightOutputEntry;
 	//***********************************************************************************
 	
 	public static void run() { 
@@ -45,7 +45,7 @@ public class Test {
 		LeftEncoderValueEntry 		= table.getEntry("Left Encoder Value");
 		leftChassisPOWEREntry 		= table.getEntry("left Chassis POWER");
 		rightChassisPOWEREntry 		= table.getEntry("right Chassis POWER");
-		turnValueEntry 				= table.getEntry("Turn Value");
+		TurnValueEntry 				= table.getEntry("Turn Value");
 		leftOutputEntry 			= table.getEntry("leftOutput");
 		rightOutputEntry 			= table.getEntry("rightOutput");
 		//*******************************************************************************
@@ -56,19 +56,17 @@ public class Test {
 	//int i=0;
 
 		loggerOn = false;	// This value is set to 'true' in Robot.init & then false at Robot.disable.
-
-		initSB();
-		IOInfoSB();
+		System.out.println("LoggerOn: " + loggerOn + " - waiting on NetworkTables and/or Robot");
 	//loggerEntry.setBoolean(true);
 		while(!loggerOn){
 		loggerOn = loggerEntry.getBoolean(false);
-		System.out.println("LoggerOn: " + loggerOn + "::"+table.getEntry("logger"));  // remove duplicate...
-		
+		sleepy();
 	//i=i+1;
 	//if (i>10){ loggerEntry.setBoolean(true);}
+		}	
 		
-		sleepy();
-		}
+		initSB();
+		IOInfoSB();
 
 		if(loggerOn) {System.out.println("Begin logging..");}
 		while(loggerOn){
@@ -147,7 +145,7 @@ public class Test {
 	}
 
 
-	// use to add items to IOInfo from array, or keep as is, adding all elements in one method.????
+	// future:? to add items to IOInfo from array, or keep as is, adding all elements in one method.????
 
 	
 	public static void addIOInfo(String name, String type, String direction, String port) {
@@ -209,14 +207,14 @@ public class Test {
 		
 		//***************************************************************************************
 		addState("logger",				"logger"				,loggerEntry.getBoolean(false));
-		addState("Right Encoder Value",	"Right Encoder Value"	,true);
-		addState("Left Encoder Value",	"Right Encoder Value"	,true);
-		addState("right Chassis POWER",	"left Chassis POWER"	,false);
-		addState("left Chassis POWER",	"left Chassis POWER"	,false);
-		addState("Turn Value",			"Turn Value"			,loggerOn);
-		addState("rightOutput",			"leftOutput"			,yaw);
-		addState("leftOutput",			"leftOutput"			,yaw);
-		addState("yaw",					"yaw"					,yaw);
+		addState("Right Encoder Value",	"Right Encoder Value"	,RightEncoderValueEntry.getDouble(0.0));
+		addState("Left Encoder Value",	"Right Encoder Value"	,LeftEncoderValueEntry.getDouble(0.0));
+		addState("right Chassis POWER",	"left Chassis POWER"	,rightChassisPOWEREntry.getDouble(0.0));
+		addState("left Chassis POWER",	"left Chassis POWER"	,leftChassisPOWEREntry.getDouble(0.0));
+		addState("Turn Value",			"Turn Value"			,TurnValueEntry.getDouble(0.0));
+		addState("rightOutput",			"leftOutput"			,rightOutputEntry.getDouble(0.0));
+		addState("leftOutput",			"leftOutput"			,leftOutputEntry.getDouble(0.0));
+		addState("yaw",					"yaw"					,yawEntry.getDouble(0.0));
 		//***************************************************************************************
 
 		builder.setLength(Math.max(builder.length() - 1,0));  	//removes comma from last entry.
