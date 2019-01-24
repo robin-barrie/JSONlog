@@ -316,3 +316,4 @@ public class Test {
 		builder.setLength(Math.max(builder.length() - 1,0));  	//remove comma from last entry.
 		builder.append("\n\t\t] },");							//close out state entry.
 	}
+}
