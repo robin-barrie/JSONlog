@@ -7,9 +7,9 @@ import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 
-public class Test {
+public class NerdyJSONLog {
 	public static void main(String[] args)  {
-	Test.run();
+	NerdyJSONLog.run();
 	}
 
 	public static File f;
