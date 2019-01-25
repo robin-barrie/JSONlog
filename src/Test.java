@@ -16,73 +16,64 @@ public class Test {
 	public static StringBuilder builder = new StringBuilder();
 	public static FileWriter fw_file;
 	public static BufferedWriter bw_file;
-	public static NetworkTableEntry eventName, matchNumber;
+	//public static NetworkTableEntry eventName, matchNumber;
 	
 	public static boolean loggerOn;
-	
-	public static double yaw;		//temp
 
 	//***********************************************************************************
 	//  There are 4 areas that need to be updated for each item that is to be logged.
 	//  This includes the two below, as well as IOInfoSB() & stateSB().
 	//***********************************************************************************
 	public static NetworkTableEntry loggerEntry, yawEntry, RightEncoderValueEntry, LeftEncoderValueEntry, 
-	leftChassisPOWEREntry, rightChassisPOWEREntry, TurnValueEntry, leftOutputEntry, rightOutputEntry;
+	leftChassisPOWEREntry, rightChassisPOWEREntry, TurnValueEntry, leftOutputEntry, rightOutputEntry, 
+	RightVelocityEntry, LeftVelocityEntry, AngleDifferanceEntry;
 	//***********************************************************************************
+	
 	
 	public static void run() { 
 
 		NetworkTableInstance inst = NetworkTableInstance.getDefault();
 		NetworkTable table = inst.getTable("SmartDashboard");
-		NetworkTable fms = inst.getTable("FMSInfo");
-		eventName = fms.getEntry("EventName");
-		matchNumber = fms.getEntry("MatchNumber");
+		//fms = inst.getTable("FMSInfo");
+		//eventName = fms.getEntry("EventName");
+		//matchNumber = fms.getEntry("MatchNumber");
 		
 		//*******************************************************************************
-		loggerEntry 				= table.getEntry("logger");
-		yawEntry 					= table.getEntry("yaw");
-		RightEncoderValueEntry 		= table.getEntry("Right Encoder Value");
-		LeftEncoderValueEntry 		= table.getEntry("Left Encoder Value");
-		leftChassisPOWEREntry 		= table.getEntry("left Chassis POWER");
-		rightChassisPOWEREntry 		= table.getEntry("right Chassis POWER");
-		TurnValueEntry 				= table.getEntry("Turn Value");
-		leftOutputEntry 			= table.getEntry("leftOutput");
-		rightOutputEntry 			= table.getEntry("rightOutput");
+		loggerEntry					= table.getEntry("Logger");
+		yawEntry					= table.getEntry("yaw");
+		RightEncoderValueEntry		= table.getEntry("Right Encoder Value");
+		LeftEncoderValueEntry		= table.getEntry("Left Encoder Value");
+		leftChassisPOWEREntry		= table.getEntry("left Chassis POWER");
+		rightChassisPOWEREntry		= table.getEntry("right Chassis POWER");
+		TurnValueEntry				= table.getEntry("Turn Value");
+		leftOutputEntry				= table.getEntry("leftOutput");
+		rightOutputEntry			= table.getEntry("rightOutput");
+		RightVelocityEntry			= table.getEntry("RightVelocity");
+		LeftVelocityEntry			= table.getEntry("LeftVelocity");
+		AngleDifferanceEntry		= table.getEntry("AngleDifferance");
 		//*******************************************************************************
 		
-		inst.startServer("2337");  // team # or use inst.startClient("hostname") or similar
+		inst.startClientTeam(2337);  // team # or use inst.startClient("hostname") or similar
 		//inst.startDSClient();  // recommended if running on DS computer; this gets the robot IP from the DS
-
-	//int i=0;
 
 		loggerOn = false;	// This value is set to 'true' in Robot.init & then false at Robot.disable.
 		System.out.println("LoggerOn: " + loggerOn + " - waiting on NetworkTables and/or Robot");
-	//loggerEntry.setBoolean(true);
 		while(!loggerOn){
-		loggerOn = loggerEntry.getBoolean(false);
-		sleepy();
-	//i=i+1;
-	//if (i>10){ loggerEntry.setBoolean(true);}
-		}	
-		
+			loggerOn = loggerEntry.getBoolean(false);
+			System.out.print(".");
+			sleepy();
+			}	
 		initSB();
 		IOInfoSB();
 
-		if(loggerOn) {System.out.println("Begin logging..");}
+		if(loggerOn) {System.out.println("Begin logging..");} //need if??
 		while(loggerOn){
 			loggerOn = loggerEntry.getBoolean(false);
 			stateSB();
-	//TESTstateSB();
-			sleepy();
-			
-	//i=i+1;
-	//if (i>20){loggerEntry.setBoolean(false);}
-	//yaw = Math.sin(System.currentTimeMillis());
-		
+			sleepy();		
+			System.out.print(".");
 		}
 		finalStateSB();	
-		
-		System.out.println("builder string: \n" + builder);		//TEMP
 	}
 
 	
@@ -91,9 +82,9 @@ public class Test {
 	 * 
 	 */
 	public static void initSB() {
-				
+				//eventName.getString("test") + (int) matchNumber.getDouble(0.0) + //maybe add to file title
     	try {
-    		f = new File("/Users/Public/Documents/log" + eventName.getString("test") + (int) matchNumber.getDouble(0.0) + System.currentTimeMillis() + ".txt");
+    		f = new File("/Users/Public/Documents/log" + System.currentTimeMillis() + ".txt");
     		if(!f.exists()){
     			f.createNewFile();
     		}
@@ -136,7 +127,10 @@ public class Test {
 		addIOInfo("Turn Value"				, "", "Input", "");
 		addIOInfo("leftOutput"				, "", "Input", "");
 		addIOInfo("rightOutput"				, "", "Input", "");
-		addIOInfo("Yaw"						, "", "Input", "");
+		addIOInfo("yaw"						, "", "Input", "");
+		addIOInfo("RightVelocity"			, "", "Input", "");
+		addIOInfo("LeftVelocity"			, "", "Input", "");
+		addIOInfo("AngleDifferance"			, "", "Input", "");
 		//*******************************************************************************
 		
 		builder.setLength(Math.max(builder.length() - 1,0));  	//remove comma from last entry.
@@ -191,7 +185,7 @@ public class Test {
 
 	public static void sleepy(){
 		try {
-			Thread.sleep(1000);
+			Thread.sleep(50);
 		  } catch (InterruptedException ex) {
 			System.out.println("sleep interrupted");
 			return;
@@ -206,7 +200,7 @@ public class Test {
 		builder.append("\n\t{\"timestamp\":\"" + System.currentTimeMillis() + "\",\"values\":[");
 		
 		//***************************************************************************************
-		addState("logger",				"logger"				,loggerEntry.getBoolean(false));
+		addState("logger",				"logger"				,RightEncoderValueEntry.getBoolean(false));
 		addState("Right Encoder Value",	"Right Encoder Value"	,RightEncoderValueEntry.getDouble(0.0));
 		addState("Left Encoder Value",	"Right Encoder Value"	,LeftEncoderValueEntry.getDouble(0.0));
 		addState("right Chassis POWER",	"left Chassis POWER"	,rightChassisPOWEREntry.getDouble(0.0));
@@ -215,6 +209,9 @@ public class Test {
 		addState("rightOutput",			"leftOutput"			,rightOutputEntry.getDouble(0.0));
 		addState("leftOutput",			"leftOutput"			,leftOutputEntry.getDouble(0.0));
 		addState("yaw",					"yaw"					,yawEntry.getDouble(0.0));
+		addState("AngleDifferance",		"AngleDifferance"		,AngleDifferanceEntry.getDouble(0.0));
+		addState("RightVelocity",		"RightVelocity"			,RightVelocityEntry.getDouble(0.0));
+		addState("LeftVelocity",		"LeftVelocity"			,LeftVelocityEntry.getDouble(0.0));
 		//***************************************************************************************
 
 		builder.setLength(Math.max(builder.length() - 1,0));  	//removes comma from last entry.
@@ -224,7 +221,8 @@ public class Test {
 	 *  Multiple methods to add State(s) based on info type.
 	 *  i.e. boolean, double, string (not sure if can use string in viewer)
 	 */
-
+	
+	// For Doubles
 	public static void addState(String name, String parent, double value) {
 		
 		String m_name = name;
@@ -239,7 +237,8 @@ public class Test {
 		builder.append(m_value);
 		builder.append("\"},");	
 	}
-
+	
+	//For Booleans
 	public static void addState(String name, String parent, boolean value) {
 				
 		String m_name = name;
@@ -255,6 +254,7 @@ public class Test {
 		builder.append("\"},");	
 	}
 	
+	//For Strings, not sure we can do strings.
 	public static void addState(String name, String parent, String value) {
 		
 		String m_name = name;
@@ -268,50 +268,5 @@ public class Test {
 		builder.append("\",\"value\":\"");
 		builder.append(m_value);
 		builder.append("\"},");	
-	}
-	
-	// using to test overall program..  read network tables and and every 20ms? for actual program
-
-	public static void TESTstateSB() {  
-
-		builder.append("\n\t{\"timestamp\":\"" + System.currentTimeMillis() + "\",\"values\":[");
-		addState("button1","driver-button1",false);
-		addState("button2","driver-button2",true);
-		addState("button4","driver-button4",false);
-		addState("logger","loggerOn",loggerOn);
-		addState("yaw","yaw",yaw);
-		
-		builder.setLength(Math.max(builder.length() - 1,0));  	//remove comma from last entry.
-		builder.append("\n\t\t] },");							//close out state entry.
-		
-		try{ Thread.sleep(20);
-			} catch (InterruptedException e) {
-			e.printStackTrace();}
-		
-		
-		builder.append("\n\t{\"timestamp\":\"" + System.currentTimeMillis() + "\",\"values\":[");
-		addState("button1","driver-button1",false);
-		addState("button2","driver-button2",false);
-		addState("button4","driver-button4",false);
-		addState("logger","loggerOn",loggerOn);
-		addState("yaw","yaw",yaw);
-		
-		builder.setLength(Math.max(builder.length() - 1,0));  	//remove comma from last entry.
-		builder.append("\n\t\t] },");							//close out state entry.
-			
-		try{ Thread.sleep(20);
-		} catch (InterruptedException e) {
-		e.printStackTrace();}
-
-		
-		builder.append("\n\t{\"timestamp\":\"" + System.currentTimeMillis() + "\",\"values\":[");
-		addState("button1","driver-button1",true);
-		addState("button2","driver-button2",true);
-		addState("button4","driver-button4",true);	
-		addState("logger","loggerOn",loggerOn);
-		addState("yaw","yaw",yaw);
-		
-		builder.setLength(Math.max(builder.length() - 1,0));  	//remove comma from last entry.
-		builder.append("\n\t\t] },");							//close out state entry.
 	}
 }
