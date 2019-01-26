@@ -65,20 +65,21 @@ public class NerdyJSONLog {
 
 		loggerOn = false;	// This value is set to 'true' in Robot.init & then false at Robot.disable.
 		System.out.println("LoggerOn: " + loggerOn + " - waiting on NetworkTables and/or Robot");
+		int i = 0;
 		while(!loggerOn){
 			loggerOn = loggerEntry.getBoolean(false);
-			System.out.print(".");
+			System.out.print("."); i = i + 1; if(i>100) {System.out.println("-"); i=0;}
 			sleepy();
-			}	
+		}
 		initSB();
 		IOInfoSB();
-
+		i=0;
 		if(loggerOn) {System.out.println("Begin logging..");} //need if??
 		while(loggerOn){
 			loggerOn = loggerEntry.getBoolean(false);
 			stateSB();
 			sleepy();		
-			System.out.print(".");
+			System.out.print("."); i = i + 1; if(i>100) {System.out.println("-"); i=0;}
 		}
 		finalStateSB();	
 	}
