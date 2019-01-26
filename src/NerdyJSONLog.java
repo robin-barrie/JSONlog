@@ -26,7 +26,8 @@ public class NerdyJSONLog {
 	//***********************************************************************************
 	public static NetworkTableEntry loggerEntry, yawEntry, RightEncoderValueEntry, LeftEncoderValueEntry, 
 	leftChassisPOWEREntry, rightChassisPOWEREntry, TurnValueEntry, leftOutputEntry, rightOutputEntry, 
-	RightVelocityEntry, LeftVelocityEntry, AngleDifferanceEntry;
+	RightVelocityEntry, LeftVelocityEntry, AngleDifferanceEntry,
+	testValue1Entry, testValue2Entry, testValue3Entry, testValue4Entry, testValue5Entry, testValue6Entry;
 	//***********************************************************************************
 	
 	
@@ -51,6 +52,12 @@ public class NerdyJSONLog {
 		RightVelocityEntry			= table.getEntry("RightVelocity");
 		LeftVelocityEntry			= table.getEntry("LeftVelocity");
 		AngleDifferanceEntry		= table.getEntry("AngleDifferance");
+		testValue1Entry				= table.getEntry("testValue1");
+		testValue2Entry				= table.getEntry("testValue2");
+		testValue3Entry				= table.getEntry("testValue3");
+		testValue4Entry				= table.getEntry("testValue4");
+		testValue5Entry				= table.getEntry("testValue5");
+		testValue6Entry				= table.getEntry("testValue6");
 		//*******************************************************************************
 		
 		inst.startClientTeam(2337);  // team # or use inst.startClient("hostname") or similar
@@ -131,6 +138,12 @@ public class NerdyJSONLog {
 		addIOInfo("RightVelocity"			, "", "Input", "");
 		addIOInfo("LeftVelocity"			, "", "Input", "");
 		addIOInfo("AngleDifferance"			, "", "Input", "");
+		addIOInfo("testValue1"				, "", "Input", "");
+		addIOInfo("testValue2"				, "", "Input", "");
+		addIOInfo("testValue3"				, "", "Input", "");
+		addIOInfo("testValue4"				, "", "Input", "");
+		addIOInfo("testValue5"				, "", "Input", "");
+		addIOInfo("testValue6"				, "", "Input", "");
 		//*******************************************************************************
 		
 		builder.setLength(Math.max(builder.length() - 1,0));  	//remove comma from last entry.
@@ -212,6 +225,12 @@ public class NerdyJSONLog {
 		addState("AngleDifferance",		"AngleDifferance"		,AngleDifferanceEntry.getDouble(0.0));
 		addState("RightVelocity",		"RightVelocity"			,RightVelocityEntry.getDouble(0.0));
 		addState("LeftVelocity",		"LeftVelocity"			,LeftVelocityEntry.getDouble(0.0));
+		addState("testValue1",			"testValue1"			,testValue1Entry.getDouble(0.0));
+		addState("testValue2",			"testValue2"			,testValue2Entry.getDouble(0.0));
+		addState("testValue3",			"testValue3"			,testValue3Entry.getDouble(0.0));
+		addState("testValue4",			"testValue4"			,testValue4Entry.getDouble(0.0));
+		addState("testValue5",			"testValue5"			,testValue5Entry.getDouble(0.0));
+		addState("testValue6",			"testValue6"			,testValue6Entry.getDouble(0.0));
 		//***************************************************************************************
 
 		builder.setLength(Math.max(builder.length() - 1,0));  	//removes comma from last entry.
