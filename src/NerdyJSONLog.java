@@ -62,14 +62,20 @@ public class NerdyJSONLog {
 		
 		inst.startClientTeam(2337);  // team # or use inst.startClient("hostname") or similar
 		//inst.startDSClient();  // recommended if running on DS computer; this gets the robot IP from the DS
+		//inst.startClient("10.0.1.5");
 
 		loggerOn = false;	// This value is set to 'true' in Robot.init & then false at Robot.disable.
 		System.out.println("LoggerOn: " + loggerOn + " - waiting on NetworkTables and/or Robot");
 		int i = 0;
+
+		System.out.print( loggerEntry.getBoolean(false) );
+
 		while(!loggerOn){
 			loggerOn = loggerEntry.getBoolean(false);
 			System.out.print("."); i = i + 1; if(i>100) {System.out.println("-"); i=0;}
 			sleepy();
+			//System.out.print( loggerEntry.getBoolean(false) );
+			//System.out.print( yawEntry.getDouble(1) );
 		}
 		initSB();
 		IOInfoSB();
@@ -82,6 +88,8 @@ public class NerdyJSONLog {
 			System.out.print("."); i = i + 1; if(i>100) {System.out.println("-"); i=0;}
 		}
 		finalStateSB();	
+
+		//run();
 	}
 
 	
@@ -127,7 +135,7 @@ public class NerdyJSONLog {
 		builder.append("{\"ioinfo\":[");
 		
 		//*******************************************************************************
-		addIOInfo("logger"					, "", "Input", "");
+		addIOInfo("Logger"					, "", "Input", "");
 		addIOInfo("Right Encoder Value"		, "", "Input", "");
 		addIOInfo("Left Encoder Value"		, "", "Input", "");
 		addIOInfo("left Chassis POWER"		, "", "Input", "");
@@ -214,7 +222,7 @@ public class NerdyJSONLog {
 		builder.append("\n\t{\"timestamp\":\"" + System.currentTimeMillis() + "\",\"values\":[");
 		
 		//***************************************************************************************
-		addState("logger",				"logger"				,RightEncoderValueEntry.getBoolean(false));
+		addState("Logger",				"Logger"				,RightEncoderValueEntry.getBoolean(false));
 		addState("Right Encoder Value",	"Right Encoder Value"	,RightEncoderValueEntry.getDouble(0.0));
 		addState("Left Encoder Value",	"Right Encoder Value"	,LeftEncoderValueEntry.getDouble(0.0));
 		addState("right Chassis POWER",	"left Chassis POWER"	,rightChassisPOWEREntry.getDouble(0.0));
@@ -289,4 +297,16 @@ public class NerdyJSONLog {
 		builder.append(m_value);
 		builder.append("\"},");	
 	}
+
+/*
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
+	<classpathentry kind="output" path="bin"/>
+	<classpathentry kind="lib" path="lib/ntcore-java-4.0.0.jar"/>
+	<classpathentry kind="lib" path="lib/ntcore-jni-4.0.0-all.jar"/>
+	<classpathentry kind="lib" path="lib/wpiutil-java-3.0.0.jar"/>
+</classpath>
+*/
 }

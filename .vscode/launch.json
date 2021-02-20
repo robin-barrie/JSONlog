@@ -9,13 +9,14 @@
             "type": "java",
             "name": "Debug (Launch) - Current File",
             "request": "launch",
-            "mainClass": "${file}"
+            "mainClass": "${file}",
+            "desktop": true
         },
         {
             "type": "java",
             "name": "Debug (Launch)-Test<JSONlog>",
             "request": "launch",
-            "mainClass": "Test",
+            "mainClass": "NerdyJSONLog",
             "projectName": "JSONlog"
         }
     ]
