@@ -2,6 +2,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.*;
 
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
@@ -19,6 +20,7 @@ public class NerdyJSONLog {
 	//public static NetworkTableEntry eventName, matchNumber;
 	
 	public static boolean loggerOn;
+	public static NetworkTable table;
 
 	//***********************************************************************************
 	//  There are 4 areas that need to be updated for each item that is to be logged.
@@ -29,12 +31,13 @@ public class NerdyJSONLog {
 	RightVelocityEntry, LeftVelocityEntry, AngleDifferanceEntry,
 	testValue1Entry, testValue2Entry, testValue3Entry, testValue4Entry, testValue5Entry, testValue6Entry;
 	//***********************************************************************************
+	private static Object[] array;
 	
 	
 	public static void run() { 
 
 		NetworkTableInstance inst = NetworkTableInstance.getDefault();
-		NetworkTable table = inst.getTable("SmartDashboard");
+		table = inst.getTable("SmartDashboard");
 		//fms = inst.getTable("FMSInfo");
 		//eventName = fms.getEntry("EventName");
 		//matchNumber = fms.getEntry("MatchNumber");
@@ -60,9 +63,9 @@ public class NerdyJSONLog {
 		testValue6Entry				= table.getEntry("testValue6");
 		//*******************************************************************************
 		
-		inst.startClientTeam(2337);  // team # or use inst.startClient("hostname") or similar
+		//inst.startClientTeam(2337);  // team # or use inst.startClient("hostname") or similar
 		//inst.startDSClient();  // recommended if running on DS computer; this gets the robot IP from the DS
-		//inst.startClient("10.0.1.5");
+		inst.startClient("10.0.1.58");
 
 		loggerOn = false;	// This value is set to 'true' in Robot.init & then false at Robot.disable.
 		System.out.println("LoggerOn: " + loggerOn + " - waiting on NetworkTables and/or Robot");
@@ -79,6 +82,10 @@ public class NerdyJSONLog {
 		}
 		initSB();
 		IOInfoSB();
+
+		retriveKeys(); //get keys from Smartdashboard and try to automatically set up fields.
+
+
 		i=0;
 		if(loggerOn) {System.out.println("Begin logging..");} //need if??
 		while(loggerOn){
@@ -86,6 +93,8 @@ public class NerdyJSONLog {
 			stateSB();
 			sleepy();		
 			System.out.print("."); i = i + 1; if(i>100) {System.out.println("-"); i=0;}
+			System.out.print(table.getKeys());
+			
 		}
 		finalStateSB();	
 
@@ -298,15 +307,14 @@ public class NerdyJSONLog {
 		builder.append("\"},");	
 	}
 
-/*
-<?xml version="1.0" encoding="UTF-8"?>
-<classpath>
-	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
-	<classpathentry kind="output" path="bin"/>
-	<classpathentry kind="lib" path="lib/ntcore-java-4.0.0.jar"/>
-	<classpathentry kind="lib" path="lib/ntcore-jni-4.0.0-all.jar"/>
-	<classpathentry kind="lib" path="lib/wpiutil-java-3.0.0.jar"/>
-</classpath>
-*/
+	public static void retriveKeys(){
+		Set<String> sdKeys = table.getKeys();
+		System.out.println( "size:" + sdKeys.size());
+		Object headings[] = sdKeys.toArray();
+		for (String value:sdKeys) 
+			System.out.println( value + ",,");
+		}
+
+
+	}
 }
