@@ -26,7 +26,8 @@ public class NerdyJSONLog {
 	//***********************************************************************************
 	public static NetworkTableEntry loggerEntry, yawEntry, RightEncoderValueEntry, LeftEncoderValueEntry, 
 	leftChassisPOWEREntry, rightChassisPOWEREntry, TurnValueEntry, leftOutputEntry, rightOutputEntry, 
-	RightVelocityEntry, LeftVelocityEntry, AngleDifferanceEntry,
+	RightVelocityEntry, LeftVelocityEntry, 
+	desiredState_xEntry, desiredState_yEntry, Current_xEntry, Current_yEntry,
 	testValue1Entry, testValue2Entry, testValue3Entry, testValue4Entry, testValue5Entry, testValue6Entry;
 	//***********************************************************************************
 	
@@ -51,7 +52,10 @@ public class NerdyJSONLog {
 		rightOutputEntry			= table.getEntry("rightOutput");
 		RightVelocityEntry			= table.getEntry("RightVelocity");
 		LeftVelocityEntry			= table.getEntry("LeftVelocity");
-		AngleDifferanceEntry		= table.getEntry("AngleDifferance");
+		desiredState_xEntry   		= table.getEntry("desiredState_x");
+		desiredState_yEntry   		= table.getEntry("desiredState_y");
+		Current_xEntry   			= table.getEntry("Current_x");
+		Current_yEntry   			= table.getEntry("Current_y");
 		testValue1Entry				= table.getEntry("testValue1");
 		testValue2Entry				= table.getEntry("testValue2");
 		testValue3Entry				= table.getEntry("testValue3");
@@ -60,9 +64,9 @@ public class NerdyJSONLog {
 		testValue6Entry				= table.getEntry("testValue6");
 		//*******************************************************************************
 		
-		inst.startClientTeam(2337);  // team # or use inst.startClient("hostname") or similar
+		//inst.startClientTeam(2337);  // team # or use inst.startClient("hostname") or similar
 		//inst.startDSClient();  // recommended if running on DS computer; this gets the robot IP from the DS
-		//inst.startClient("10.0.1.5");
+		inst.startClient("10.0.1.58");
 
 		loggerOn = false;	// This value is set to 'true' in Robot.init & then false at Robot.disable.
 		System.out.println("LoggerOn: " + loggerOn + " - waiting on NetworkTables and/or Robot");
@@ -100,7 +104,7 @@ public class NerdyJSONLog {
 	public static void initSB() {
 				//eventName.getString("test") + (int) matchNumber.getDouble(0.0) + //maybe add to file title
     	try {
-    		f = new File("/Users/Public/Documents/log" + System.currentTimeMillis() + ".txt");
+    		f = new File("/Users/Public/Documents/Logs/log" + System.currentTimeMillis() + ".txt");
     		if(!f.exists()){
     			f.createNewFile();
     		}
@@ -146,7 +150,10 @@ public class NerdyJSONLog {
 		addIOInfo("yaw"						, "", "Input", "");
 		addIOInfo("RightVelocity"			, "", "Input", "");
 		addIOInfo("LeftVelocity"			, "", "Input", "");
-		addIOInfo("AngleDifferance"			, "", "Input", "");
+		addIOInfo("desiredState_x"			, "", "Input", "");
+		addIOInfo("desiredState_y"			, "", "Input", "");
+		addIOInfo("Current_x"				, "", "Input", "");
+		addIOInfo("Current_y"				, "", "Input", "");
 		addIOInfo("testValue1"				, "", "Input", "");
 		addIOInfo("testValue2"				, "", "Input", "");
 		addIOInfo("testValue3"				, "", "Input", "");
@@ -231,7 +238,10 @@ public class NerdyJSONLog {
 		addState("rightOutput",			"leftOutput"			,rightOutputEntry.getDouble(0.0));
 		addState("leftOutput",			"leftOutput"			,leftOutputEntry.getDouble(0.0));
 		addState("yaw",					"yaw"					,yawEntry.getDouble(0.0));
-		addState("AngleDifferance",		"AngleDifferance"		,AngleDifferanceEntry.getDouble(0.0));
+		addState("desiredState_x",		"desiredState_x"		,desiredState_xEntry.getDouble(0.0));
+		addState("desiredState_y",		"desiredState_y"		,desiredState_yEntry.getDouble(0.0));
+		addState("Current_x",			"Current_x"				,Current_xEntry.getDouble(0.0));
+		addState("Current_y",			"Current_y"				,Current_yEntry.getDouble(0.0));
 		addState("RightVelocity",		"RightVelocity"			,RightVelocityEntry.getDouble(0.0));
 		addState("LeftVelocity",		"LeftVelocity"			,LeftVelocityEntry.getDouble(0.0));
 		addState("testValue1",			"testValue1"			,testValue1Entry.getDouble(0.0));
