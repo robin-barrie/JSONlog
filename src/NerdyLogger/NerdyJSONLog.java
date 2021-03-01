@@ -34,9 +34,9 @@ public class NerdyJSONLog {
 	//  There are 4 areas that need to be updated for each item that is to be logged.
 	//  This includes the two below, as well as IOInfoSB() & stateSB().
 	//***********************************************************************************
-	public static NetworkTableEntry loggerEntry, yawEntry, RightEncoderValueEntry, LeftEncoderValueEntry, 
-	leftChassisPOWEREntry, rightChassisPOWEREntry, TurnValueEntry, leftOutputEntry, rightOutputEntry, 
-	RightVelocityEntry, LeftVelocityEntry, Velocity_XEntry, Velocity_YEntry,
+	public static NetworkTableEntry loggerEntry, isFieldOrientedEntry,
+	yawEntry, RotationEntry, ForwardEntry, StrafeEntry, 
+	Velocity_0Entry, Velocity_1Entry, Velocity_2Entry, Velocity_3Entry, Velocity_XEntry, Velocity_YEntry,
 	desiredState_xEntry, desiredState_yEntry, Current_xEntry, Current_yEntry,
 	testValue1Entry, testValue2Entry, testValue3Entry, testValue4Entry, testValue5Entry, testValue6Entry;
 	//***********************************************************************************
@@ -55,21 +55,20 @@ public class NerdyJSONLog {
 		//*******************************************************************************
 		loggerEntry					= table.getEntry("Logger");
 		yawEntry					= table.getEntry("yaw");
-		RightEncoderValueEntry		= table.getEntry("Right Encoder Value");
-		LeftEncoderValueEntry		= table.getEntry("Left Encoder Value");
-		leftChassisPOWEREntry		= table.getEntry("left Chassis POWER");
-		rightChassisPOWEREntry		= table.getEntry("right Chassis POWER");
-		TurnValueEntry				= table.getEntry("Turn Value");
-		leftOutputEntry				= table.getEntry("leftOutput");
-		rightOutputEntry			= table.getEntry("rightOutput");
-		RightVelocityEntry			= table.getEntry("RightVelocity");
-		LeftVelocityEntry			= table.getEntry("LeftVelocity");
+		isFieldOrientedEntry		= table.getEntry("isFieldOriented");
+		ForwardEntry				= table.getEntry("Forward");
+		RotationEntry				= table.getEntry("Rotation");
+		StrafeEntry					= table.getEntry("Strafe");
 		desiredState_xEntry   		= table.getEntry("desiredState_x");
 		desiredState_yEntry   		= table.getEntry("desiredState_y");
 		Current_xEntry   			= table.getEntry("Current_x");
 		Current_yEntry   			= table.getEntry("Current_y");//Velocity/0
 		Velocity_XEntry   			= table.getEntry("Velocity X");
 		Velocity_YEntry   			= table.getEntry("Velocity Y");
+		Velocity_0Entry				= table.getEntry("Velocity/0");
+		Velocity_1Entry				= table.getEntry("Velocity/1");
+		Velocity_2Entry				= table.getEntry("Velocity/2");
+		Velocity_3Entry				= table.getEntry("Velocity/3");
 		testValue1Entry				= table.getEntry("testValue1");
 		testValue2Entry				= table.getEntry("testValue2");
 		testValue3Entry				= table.getEntry("testValue3");
@@ -80,7 +79,8 @@ public class NerdyJSONLog {
 		
 		//inst.startClientTeam(2337);  // team # or use inst.startClient("hostname") or similar
 		//inst.startDSClient();  // recommended if running on DS computer; this gets the robot IP from the DS
-		inst.startClient("10.23.37.2");
+		//inst.startClient("10.23.37.2");
+		inst.startClient("10.0.1.49");
 
 		loggerOn = false;	// This value is set to 'true' in Robot.init & then false at Robot.disable.
 		System.out.println("LoggerOn: " + loggerOn + " - waiting on NetworkTables and/or Robot");
@@ -108,8 +108,6 @@ public class NerdyJSONLog {
 			stateSB();
 			sleepy();		
 			System.out.print("."); i = i + 1; if(i>100) {System.out.println("-"); i=0;}
-			System.out.print(table.getKeys());
-			
 		}
 		finalStateSB();	
 
@@ -160,22 +158,21 @@ public class NerdyJSONLog {
 		
 		//*******************************************************************************
 		addIOInfo("Logger"					, "", "Input", "");
-		addIOInfo("Right Encoder Value"		, "", "Input", "");
-		addIOInfo("Left Encoder Value"		, "", "Input", "");
-		addIOInfo("left Chassis POWER"		, "", "Input", "");
-		addIOInfo("right Chassis POWER"		, "", "Input", "");
-		addIOInfo("Turn Value"				, "", "Input", "");
-		addIOInfo("leftOutput"				, "", "Input", "");
-		addIOInfo("rightOutput"				, "", "Input", "");
+		addIOInfo("isFieldOriented" 		, "", "Input", "");
 		addIOInfo("yaw"						, "", "Input", "");
-		addIOInfo("RightVelocity"			, "", "Input", "");
-		addIOInfo("LeftVelocity"			, "", "Input", "");
+		addIOInfo("Forward"					, "", "Input", "");
+		addIOInfo("Rotation"				, "", "Input", "");
+		addIOInfo("Strafe"					, "", "Input", "");
 		addIOInfo("desiredState_x"			, "", "Input", "");
 		addIOInfo("desiredState_y"			, "", "Input", "");
-		addIOInfo("Velocity X"		 		, "", "Input", "");
-		addIOInfo("Velocity Y"				, "", "Input", "");
 		addIOInfo("Current_x"				, "", "Input", "");
 		addIOInfo("Current_y"				, "", "Input", "");
+		addIOInfo("Velocity X"		 		, "", "Input", "");
+		addIOInfo("Velocity Y"				, "", "Input", "");
+		addIOInfo("Velocity/0"				, "", "Input", "");
+		addIOInfo("Velocity/1"				, "", "Input", "");
+		addIOInfo("Velocity/2"				, "", "Input", "");
+		addIOInfo("Velocity/3"				, "", "Input", "");
 		addIOInfo("testValue1"				, "", "Input", "");
 		addIOInfo("testValue2"				, "", "Input", "");
 		addIOInfo("testValue3"				, "", "Input", "");
@@ -250,23 +247,22 @@ public class NerdyJSONLog {
 		builder.append("\n\t{\"timestamp\":\"" + System.currentTimeMillis() + "\",\"values\":[");
 		
 		//***************************************************************************************
-		addState("Logger",				"Logger"				,RightEncoderValueEntry.getBoolean(false));
-		addState("Right Encoder Value",	"Right Encoder Value"	,RightEncoderValueEntry.getDouble(0.0));
-		addState("Left Encoder Value",	"Right Encoder Value"	,LeftEncoderValueEntry.getDouble(0.0));
-		addState("right Chassis POWER",	"left Chassis POWER"	,rightChassisPOWEREntry.getDouble(0.0));
-		addState("left Chassis POWER",	"left Chassis POWER"	,leftChassisPOWEREntry.getDouble(0.0));
-		addState("Turn Value",			"Turn Value"			,TurnValueEntry.getDouble(0.0));
-		addState("rightOutput",			"leftOutput"			,rightOutputEntry.getDouble(0.0));
-		addState("leftOutput",			"leftOutput"			,leftOutputEntry.getDouble(0.0));
+		addState("Logger",				"Logger"				,loggerEntry.getBoolean(false));
+		addState("isFieldOriented",		"isFieldOriented"		,isFieldOrientedEntry.getBoolean(false));
 		addState("yaw",					"yaw"					,yawEntry.getDouble(0.0));
+		addState("Forward",				"Forward"				,ForwardEntry.getDouble(0.0));
+		addState("Rotation",			"Rotation"				,RotationEntry.getDouble(0.0));
+		addState("Strafe",				"Strafe"				,StrafeEntry.getDouble(0.0));
 		addState("desiredState_x",		"desiredState_x"		,desiredState_xEntry.getDouble(0.0));
 		addState("desiredState_y",		"desiredState_y"		,desiredState_yEntry.getDouble(0.0));
 		addState("Current_x",			"Current_x"				,Current_xEntry.getDouble(0.0));
 		addState("Current_y",			"Current_y"				,Current_yEntry.getDouble(0.0));
-		addState("RightVelocity",		"RightVelocity"			,RightVelocityEntry.getDouble(0.0));
-		addState("LeftVelocity",		"LeftVelocity"			,LeftVelocityEntry.getDouble(0.0));
 		addState("Velocity X",			"Velocity X"			,Velocity_XEntry.getDouble(0.0));
 		addState("Velocity Y",			"Velocity Y"			,Velocity_YEntry.getDouble(0.0));
+		addState("Velocity/0",			"Velocity/0"			,Velocity_0Entry.getDouble(0.0));
+		addState("Velocity/1",			"Velocity/1"			,Velocity_1Entry.getDouble(0.0));
+		addState("Velocity/2",			"Velocity/2"			,Velocity_2Entry.getDouble(0.0));
+		addState("Velocity/3",			"Velocity/3"			,Velocity_3Entry.getDouble(0.0));
 		addState("testValue1",			"testValue1"			,testValue1Entry.getDouble(0.0));
 		addState("testValue2",			"testValue2"			,testValue2Entry.getDouble(0.0));
 		addState("testValue3",			"testValue3"			,testValue3Entry.getDouble(0.0));
