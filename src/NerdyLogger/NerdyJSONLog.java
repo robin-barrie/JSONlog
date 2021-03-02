@@ -30,15 +30,24 @@ public class NerdyJSONLog {
 	public static NetworkTable table,tempTable;
 	public static NetworkTableInstance inst;
 
+	public static String[] headins = { "Logger", "yaw", "Forward", "Rotation", "Strafe", 
+									"Velocity_0", "Velocity_1", "Velocity_2", "Velocity_3", "Velocity_X", "Velocity_Y",
+									"desiredState_x", "desiredState_y", "Current_x", "Current_y"};
+
+
+	public static NetworkTableEntry Entry[] = new NetworkTableEntry[headins.length];
+
 	//***********************************************************************************
 	//  There are 4 areas that need to be updated for each item that is to be logged.
 	//  This includes the two below, as well as IOInfoSB() & stateSB().
 	//***********************************************************************************
+	/**
 	public static NetworkTableEntry loggerEntry, isFieldOrientedEntry,
 	yawEntry, RotationEntry, ForwardEntry, StrafeEntry, 
 	Velocity_0Entry, Velocity_1Entry, Velocity_2Entry, Velocity_3Entry, Velocity_XEntry, Velocity_YEntry,
 	desiredState_xEntry, desiredState_yEntry, Current_xEntry, Current_yEntry,
 	testValue1Entry, testValue2Entry, testValue3Entry, testValue4Entry, testValue5Entry, testValue6Entry;
+	**/
 	//***********************************************************************************
 	
 	
@@ -51,8 +60,15 @@ public class NerdyJSONLog {
 		//fms = inst.getTable("FMSInfo");
 		//eventName = fms.getEntry("EventName");
 		//matchNumber = fms.getEntry("MatchNumber");
-		
+		//***************************************************************************
+		// Add entries by iterating a list array.
+
+		for (int i = 0; i < headins.length-1; i++) {
+			Entry[i] = table.getEntry(headins[i]);
+		}
+
 		//*******************************************************************************
+		/**
 		loggerEntry					= table.getEntry("Logger");
 		yawEntry					= table.getEntry("yaw");
 		isFieldOrientedEntry		= table.getEntry("isFieldOriented");
@@ -62,7 +78,7 @@ public class NerdyJSONLog {
 		desiredState_xEntry   		= table.getEntry("desiredState_x");
 		desiredState_yEntry   		= table.getEntry("desiredState_y");
 		Current_xEntry   			= table.getEntry("Current_x");
-		Current_yEntry   			= table.getEntry("Current_y");//Velocity/0
+		Current_yEntry   			= table.getEntry("Current_y");
 		Velocity_XEntry   			= table.getEntry("Velocity X");
 		Velocity_YEntry   			= table.getEntry("Velocity Y");
 		Velocity_0Entry				= table.getEntry("Velocity/0");
@@ -76,20 +92,21 @@ public class NerdyJSONLog {
 		testValue5Entry				= table.getEntry("testValue5");
 		testValue6Entry				= table.getEntry("testValue6");
 		//*******************************************************************************
-		
+		**/
 		//inst.startClientTeam(2337);  // team # or use inst.startClient("hostname") or similar
 		//inst.startDSClient();  // recommended if running on DS computer; this gets the robot IP from the DS
 		//inst.startClient("10.23.37.2");
-		inst.startClient("10.0.1.49");
+		inst.startClient("10.0.1.5");
 
 		loggerOn = false;	// This value is set to 'true' in Robot.init & then false at Robot.disable.
 		System.out.println("LoggerOn: " + loggerOn + " - waiting on NetworkTables and/or Robot");
 		int i = 0;
 
-		System.out.print( loggerEntry.getBoolean(false) );
+		//System.out.print( loggerEntry.getBoolean(false) );
+		System.out.print( Entry[1].getBoolean(false) );
 
 		while(!loggerOn){
-			loggerOn = loggerEntry.getBoolean(false);
+			loggerOn = Entry[1].getBoolean(false);
 			System.out.print("."); i = i + 1; if(i>100) {System.out.println("-"); i=0;}
 			sleepy();
 			//System.out.print( loggerEntry.getBoolean(false) );
@@ -102,9 +119,9 @@ public class NerdyJSONLog {
 
 
 		i=0;
-		if(loggerOn) {System.out.println("Begin logging..");} //need if??
-		while(loggerOn){
-			loggerOn = loggerEntry.getBoolean(false);
+		if(loggerOn) {System.out.println("Begin logging..");} //need if??  
+		while(loggerOn){														// maybe add if disconnected....
+			loggerOn = Entry[1].getBoolean(false);
 			stateSB();
 			sleepy();		
 			System.out.print("."); i = i + 1; if(i>100) {System.out.println("-"); i=0;}
@@ -122,7 +139,7 @@ public class NerdyJSONLog {
 	public static void initSB() {
 				//eventName.getString("test") + (int) matchNumber.getDouble(0.0) + //maybe add to file title
     	try {
-    		f = new File("/Users/Public/Documents/Logs/log" + System.currentTimeMillis() + ".txt");
+    		f = new File("/Users/Public/Documents/log" + System.currentTimeMillis() + ".txt");
     		if(!f.exists()){
     			f.createNewFile();
     		}
@@ -157,6 +174,7 @@ public class NerdyJSONLog {
 		builder.append("{\"ioinfo\":[");
 		
 		//*******************************************************************************
+		/**
 		addIOInfo("Logger"					, "", "Input", "");
 		addIOInfo("isFieldOriented" 		, "", "Input", "");
 		addIOInfo("yaw"						, "", "Input", "");
@@ -179,7 +197,14 @@ public class NerdyJSONLog {
 		addIOInfo("testValue4"				, "", "Input", "");
 		addIOInfo("testValue5"				, "", "Input", "");
 		addIOInfo("testValue6"				, "", "Input", "");
+		*/
 		//*******************************************************************************
+
+		//***************************************************************************
+		// Add entries by iterating a list array.
+		for (int i = 1; i < headins.length; i++) {
+			addIOInfo(headins[i]			,"", "Input", "");
+		}
 		
 		builder.setLength(Math.max(builder.length() - 1,0));  	//remove comma from last entry.
 		builder.append("\n\t]");								//close out ioinfo entry.
@@ -247,6 +272,7 @@ public class NerdyJSONLog {
 		builder.append("\n\t{\"timestamp\":\"" + System.currentTimeMillis() + "\",\"values\":[");
 		
 		//***************************************************************************************
+		/**
 		addState("Logger",				"Logger"				,loggerEntry.getBoolean(false));
 		addState("isFieldOriented",		"isFieldOriented"		,isFieldOrientedEntry.getBoolean(false));
 		addState("yaw",					"yaw"					,yawEntry.getDouble(0.0));
@@ -269,7 +295,15 @@ public class NerdyJSONLog {
 		addState("testValue4",			"testValue4"			,testValue4Entry.getDouble(0.0));
 		addState("testValue5",			"testValue5"			,testValue5Entry.getDouble(0.0));
 		addState("testValue6",			"testValue6"			,testValue6Entry.getDouble(0.0));
+		*/
 		//***************************************************************************************
+
+		//***************************************************************************
+		// Add entries by iterating a list array, but firt get first entry as it is a Boolean.  maybe set up different section for Booleans later
+			addState(headins[1],		headins[1]				,Entry[1].getBoolean(false));
+		for (int i = 2; i < headins.length; i++) {
+			addState(headins[i],		headins[i]				,Entry[i].getDouble(0.0));
+		}
 
 		builder.setLength(Math.max(builder.length() - 1,0));  	//removes comma from last entry.
 		builder.append("\n\t\t] },");							//closes out state entry.
