@@ -30,13 +30,16 @@ public class NerdyJSONLog {
 	public static NetworkTable table,tempTable;
 	public static NetworkTableInstance inst;
 
-	//manually create list, working on automagically creating by reading networktable. 
-	//will store this in a configuration file as NetworkTable may not be available immediately and want to build gui to choose entries.
-	//load default table (last used? or defined?) config file unless directed otherwise.
+	// manually created list, must be exactly as entered into SmartDashboard.
+	// working on automagically creating by reading networktable headings nad subtable headings. 
+	// will store this in a configuration file as NetworkTable may not be available immediately and want to build gui to choose entries.
+	// load default table config file on start, can switch to other from gui?
 
 	public static String[] headings = { "Logger", "yaw", "Forward", "Rotation", "Strafe", 
 									"Velocity/0", "Velocity/1", "Velocity/2", "Velocity/3", "Velocity X", "Velocity Y",
-									"desiredState_x", "desiredState_y", "Current_x", "Current_y"};
+									"desiredState_x", "desiredState_y", "Current_x", "Current_y",
+									"Feet Traveled/0", "Feet Traveled/1", "Feet Traveled/2", "Feet Traveled/3",
+									"Module Angle (Degrees)/0", "Module Angle (Degrees)/1", "Module Angle (Degrees)/2", "Module Angle (Degrees)/3"};
 
 
 	public static NetworkTableEntry Entry[] = new NetworkTableEntry[headings.length];
@@ -81,7 +84,7 @@ public class NerdyJSONLog {
 		IOInfoSB();	//Add initail entry to stringbuilder that Wildloger uses to recognize entries  //MAYBE MOVE THIS BEFOE PREVIOUS WHILE STATEMENT TO SAVE TIME
 
 		i=0;
-		if(loggerOn) {System.out.println("Begin logging of " + headings.length + " entries...");		} // need if?? cant get here unless it is true
+		if(loggerOn) {System.out.println("Starting to log " + headings.length + " entries...");		} // need if?? cant get here unless it is true
 		while(loggerOn){														// maybe add if disconnected....so file closes properly at end of match.
 			loggerOn = Entry[0].getBoolean(false);
 			stateSB(); // actual logging of current states
