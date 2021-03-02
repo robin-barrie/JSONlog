@@ -30,26 +30,18 @@ public class NerdyJSONLog {
 	public static NetworkTable table,tempTable;
 	public static NetworkTableInstance inst;
 
-	public static String[] headins = { "Logger", "yaw", "Forward", "Rotation", "Strafe", 
-									"Velocity_0", "Velocity_1", "Velocity_2", "Velocity_3", "Velocity_X", "Velocity_Y",
+	//manually create list, working on automagically creating by reading networktable. 
+	//will store this in a configuration file as NetworkTable may not be available immediately and want to build gui to choose entries.
+	//load default table (last used? or defined?) config file unless directed otherwise.
+
+	public static String[] headings = { "Logger", "yaw", "Forward", "Rotation", "Strafe", 
+									"Velocity/0", "Velocity/1", "Velocity/2", "Velocity/3", "Velocity X", "Velocity Y",
 									"desiredState_x", "desiredState_y", "Current_x", "Current_y"};
 
 
-	public static NetworkTableEntry Entry[] = new NetworkTableEntry[headins.length];
+	public static NetworkTableEntry Entry[] = new NetworkTableEntry[headings.length];
 
 	//***********************************************************************************
-	//  There are 4 areas that need to be updated for each item that is to be logged.
-	//  This includes the two below, as well as IOInfoSB() & stateSB().
-	//***********************************************************************************
-	/**
-	public static NetworkTableEntry loggerEntry, isFieldOrientedEntry,
-	yawEntry, RotationEntry, ForwardEntry, StrafeEntry, 
-	Velocity_0Entry, Velocity_1Entry, Velocity_2Entry, Velocity_3Entry, Velocity_XEntry, Velocity_YEntry,
-	desiredState_xEntry, desiredState_yEntry, Current_xEntry, Current_yEntry,
-	testValue1Entry, testValue2Entry, testValue3Entry, testValue4Entry, testValue5Entry, testValue6Entry;
-	**/
-	//***********************************************************************************
-	
 	
 	public static void run() { 
 
@@ -60,39 +52,15 @@ public class NerdyJSONLog {
 		//fms = inst.getTable("FMSInfo");
 		//eventName = fms.getEntry("EventName");
 		//matchNumber = fms.getEntry("MatchNumber");
+
 		//***************************************************************************
-		// Add entries by iterating a list array.
-
-		for (int i = 0; i < headins.length-1; i++) {
-			Entry[i] = table.getEntry(headins[i]);
+		// Initiate NetwrokTable entries by iterating a list array.
+		for (int i = 0; i < headings.length; i++) {
+			Entry[i] = table.getEntry(headings[i]);
 		}
+		//Velocity_XEntry   			= table.getEntry("Velocity X");
 
 		//*******************************************************************************
-		/**
-		loggerEntry					= table.getEntry("Logger");
-		yawEntry					= table.getEntry("yaw");
-		isFieldOrientedEntry		= table.getEntry("isFieldOriented");
-		ForwardEntry				= table.getEntry("Forward");
-		RotationEntry				= table.getEntry("Rotation");
-		StrafeEntry					= table.getEntry("Strafe");
-		desiredState_xEntry   		= table.getEntry("desiredState_x");
-		desiredState_yEntry   		= table.getEntry("desiredState_y");
-		Current_xEntry   			= table.getEntry("Current_x");
-		Current_yEntry   			= table.getEntry("Current_y");
-		Velocity_XEntry   			= table.getEntry("Velocity X");
-		Velocity_YEntry   			= table.getEntry("Velocity Y");
-		Velocity_0Entry				= table.getEntry("Velocity/0");
-		Velocity_1Entry				= table.getEntry("Velocity/1");
-		Velocity_2Entry				= table.getEntry("Velocity/2");
-		Velocity_3Entry				= table.getEntry("Velocity/3");
-		testValue1Entry				= table.getEntry("testValue1");
-		testValue2Entry				= table.getEntry("testValue2");
-		testValue3Entry				= table.getEntry("testValue3");
-		testValue4Entry				= table.getEntry("testValue4");
-		testValue5Entry				= table.getEntry("testValue5");
-		testValue6Entry				= table.getEntry("testValue6");
-		//*******************************************************************************
-		**/
 		//inst.startClientTeam(2337);  // team # or use inst.startClient("hostname") or similar
 		//inst.startDSClient();  // recommended if running on DS computer; this gets the robot IP from the DS
 		//inst.startClient("10.23.37.2");
@@ -102,33 +70,27 @@ public class NerdyJSONLog {
 		System.out.println("LoggerOn: " + loggerOn + " - waiting on NetworkTables and/or Robot");
 		int i = 0;
 
-		//System.out.print( loggerEntry.getBoolean(false) );
-		System.out.print( Entry[1].getBoolean(false) );
-
+		// waiting for the "Logger" entry on the SmartDashboard to read 'true'.
 		while(!loggerOn){
-			loggerOn = Entry[1].getBoolean(false);
+			loggerOn = Entry[0].getBoolean(false);
 			System.out.print("."); i = i + 1; if(i>100) {System.out.println("-"); i=0;}
 			sleepy();
-			//System.out.print( loggerEntry.getBoolean(false) );
-			//System.out.print( yawEntry.getDouble(1) );
 		}
-		initSB();
-		IOInfoSB();
 
-		//retrieveKeys(); //get keys from Smartdashboard and try to automatically set up fields.
-
+		initSB();	//Initialize the stringbuilder to add info to
+		IOInfoSB();	//Add initail entry to stringbuilder that Wildloger uses to recognize entries  //MAYBE MOVE THIS BEFOE PREVIOUS WHILE STATEMENT TO SAVE TIME
 
 		i=0;
-		if(loggerOn) {System.out.println("Begin logging..");} //need if??  
-		while(loggerOn){														// maybe add if disconnected....
-			loggerOn = Entry[1].getBoolean(false);
-			stateSB();
-			sleepy();		
-			System.out.print("."); i = i + 1; if(i>100) {System.out.println("-"); i=0;}
+		if(loggerOn) {System.out.println("Begin logging of " + headings.length + " entries...");		} // need if?? cant get here unless it is true
+		while(loggerOn){														// maybe add if disconnected....so file closes properly at end of match.
+			loggerOn = Entry[0].getBoolean(false);
+			stateSB(); // actual logging of current states
+			sleepy();  //pause 50 milliseconds
+			System.out.print("."); i = i + 1; if(i>100) {System.out.println("-"); i=0;}  //visual indicator its working.  take out in later iterations
 		}
-		finalStateSB();	
+		finalStateSB();	// fix end of entries so that it is in the proper JSON format and then write to a text file.
 
-		//run();
+		//run();  //use this to run again.  incase robot disconnected, but also to get both auton and teleop since "Logger" boolean goes 'false' in disable
 	}
 
 	
@@ -151,6 +113,7 @@ public class NerdyJSONLog {
     	
 		try  {
 			bw_file.write(builder.toString());
+			System.out.println();
 			System.out.println("Successfully Created File..."+f);
 		}catch (IOException e) {
 		    System.err.println("Caught IOException (init bw): " + e.getMessage());
@@ -169,41 +132,12 @@ public class NerdyJSONLog {
 		// Add a line for every item to be logged.  
 		// Last entry has a unique ending
 		//
-		//  Maybe in future, read in details from an array, guarantees names match and only one place to edit****************
 		
 		builder.append("{\"ioinfo\":[");
 		
-		//*******************************************************************************
-		/**
-		addIOInfo("Logger"					, "", "Input", "");
-		addIOInfo("isFieldOriented" 		, "", "Input", "");
-		addIOInfo("yaw"						, "", "Input", "");
-		addIOInfo("Forward"					, "", "Input", "");
-		addIOInfo("Rotation"				, "", "Input", "");
-		addIOInfo("Strafe"					, "", "Input", "");
-		addIOInfo("desiredState_x"			, "", "Input", "");
-		addIOInfo("desiredState_y"			, "", "Input", "");
-		addIOInfo("Current_x"				, "", "Input", "");
-		addIOInfo("Current_y"				, "", "Input", "");
-		addIOInfo("Velocity X"		 		, "", "Input", "");
-		addIOInfo("Velocity Y"				, "", "Input", "");
-		addIOInfo("Velocity/0"				, "", "Input", "");
-		addIOInfo("Velocity/1"				, "", "Input", "");
-		addIOInfo("Velocity/2"				, "", "Input", "");
-		addIOInfo("Velocity/3"				, "", "Input", "");
-		addIOInfo("testValue1"				, "", "Input", "");
-		addIOInfo("testValue2"				, "", "Input", "");
-		addIOInfo("testValue3"				, "", "Input", "");
-		addIOInfo("testValue4"				, "", "Input", "");
-		addIOInfo("testValue5"				, "", "Input", "");
-		addIOInfo("testValue6"				, "", "Input", "");
-		*/
-		//*******************************************************************************
-
-		//***************************************************************************
 		// Add entries by iterating a list array.
-		for (int i = 1; i < headins.length; i++) {
-			addIOInfo(headins[i]			,"", "Input", "");
+		for (int i = 0; i < headings.length; i++) {
+			addIOInfo(headings[i]			,"", "Input", "");
 		}
 		
 		builder.setLength(Math.max(builder.length() - 1,0));  	//remove comma from last entry.
@@ -211,10 +145,6 @@ public class NerdyJSONLog {
 		builder.append("\n\"state\":[");						//start state entries.
 	}
 
-
-	// future:? to add items to IOInfo from array, or keep as is, adding all elements in one method.????
-
-	
 	public static void addIOInfo(String name, String type, String direction, String port) {
 		
 		String m_name = name;
@@ -241,8 +171,7 @@ public class NerdyJSONLog {
 	 * 	Writes "builder" to bufferWriter(bw) and then closes bw so that it writes to file.
 	 * 
 	 */
-	
-	public static void finalStateSB() {
+		public static void finalStateSB() {
 		builder.setLength(Math.max(builder.length() - 1,0));  	// removes comma from last entry.
 		builder.append("\n\t] \n}");							// closes out JSON format
  
@@ -250,12 +179,17 @@ public class NerdyJSONLog {
 			if(bw_file!=null)
 			bw_file.write(builder.toString());
 			 bw_file.close();
+			 System.out.println();
 			System.out.println("Successfully edited JSON and closed file..(finalStateSB).");
 		 }catch(Exception ex){
 		       System.out.println("Error in closing the BufferedWriter"+ex);
 		    }
 	}
 
+	/*
+	 *	adds slight pause between State entries while actively logging.
+	 * 
+	 */
 	public static void sleepy(){
 		try {
 			Thread.sleep(50);
@@ -265,44 +199,19 @@ public class NerdyJSONLog {
 		  }
 	}
 
-		//*************************************figure out best way to write stateSB****  all in one our array to method**** */
-	
+	/*
+	 *	Adds actual log entries of the current states while "Logger" is 'true'
+	 * 
+	 */
 	public static void stateSB() {  
 		
 		builder.append("\n\t{\"timestamp\":\"" + System.currentTimeMillis() + "\",\"values\":[");
 		
-		//***************************************************************************************
-		/**
-		addState("Logger",				"Logger"				,loggerEntry.getBoolean(false));
-		addState("isFieldOriented",		"isFieldOriented"		,isFieldOrientedEntry.getBoolean(false));
-		addState("yaw",					"yaw"					,yawEntry.getDouble(0.0));
-		addState("Forward",				"Forward"				,ForwardEntry.getDouble(0.0));
-		addState("Rotation",			"Rotation"				,RotationEntry.getDouble(0.0));
-		addState("Strafe",				"Strafe"				,StrafeEntry.getDouble(0.0));
-		addState("desiredState_x",		"desiredState_x"		,desiredState_xEntry.getDouble(0.0));
-		addState("desiredState_y",		"desiredState_y"		,desiredState_yEntry.getDouble(0.0));
-		addState("Current_x",			"Current_x"				,Current_xEntry.getDouble(0.0));
-		addState("Current_y",			"Current_y"				,Current_yEntry.getDouble(0.0));
-		addState("Velocity X",			"Velocity X"			,Velocity_XEntry.getDouble(0.0));
-		addState("Velocity Y",			"Velocity Y"			,Velocity_YEntry.getDouble(0.0));
-		addState("Velocity/0",			"Velocity/0"			,Velocity_0Entry.getDouble(0.0));
-		addState("Velocity/1",			"Velocity/1"			,Velocity_1Entry.getDouble(0.0));
-		addState("Velocity/2",			"Velocity/2"			,Velocity_2Entry.getDouble(0.0));
-		addState("Velocity/3",			"Velocity/3"			,Velocity_3Entry.getDouble(0.0));
-		addState("testValue1",			"testValue1"			,testValue1Entry.getDouble(0.0));
-		addState("testValue2",			"testValue2"			,testValue2Entry.getDouble(0.0));
-		addState("testValue3",			"testValue3"			,testValue3Entry.getDouble(0.0));
-		addState("testValue4",			"testValue4"			,testValue4Entry.getDouble(0.0));
-		addState("testValue5",			"testValue5"			,testValue5Entry.getDouble(0.0));
-		addState("testValue6",			"testValue6"			,testValue6Entry.getDouble(0.0));
-		*/
-		//***************************************************************************************
+		// Add entries by iterating a list array, but get first entry ("Logger") as it is a Boolean.  maybe set up different section for Booleans later
+			addState(headings[0],		headings[0]				,Entry[0].getBoolean(false));
 
-		//***************************************************************************
-		// Add entries by iterating a list array, but firt get first entry as it is a Boolean.  maybe set up different section for Booleans later
-			addState(headins[1],		headins[1]				,Entry[1].getBoolean(false));
-		for (int i = 2; i < headins.length; i++) {
-			addState(headins[i],		headins[i]				,Entry[i].getDouble(0.0));
+		for (int i = 1; i < headings.length; i++) {
+			addState(headings[i],		headings[i]				,Entry[i].getDouble(0.0));
 		}
 
 		builder.setLength(Math.max(builder.length() - 1,0));  	//removes comma from last entry.
@@ -361,7 +270,10 @@ public class NerdyJSONLog {
 		builder.append("\"},");	
 	}
 
-	//retrieves main headings but nut subheadings in subtables.
+// ==========================================================================================
+// experimental items, working on reading available SmartDashboard 'keys' (easy) & subtable 'keys' (working on) to creat a list for "headings"
+
+	//retrieves main headings but not subheadings in subtables.
 	public static String[] retrieveKeys(){
 
 		Set<String> sdKeys = table.getKeys();
