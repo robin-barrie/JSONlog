@@ -1,9 +1,12 @@
 package NerdyLogger;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.*;
 
 import edu.wpi.first.networktables.NetworkTable;
@@ -27,7 +30,7 @@ public class NerdyJSONLog {
 	//public static NetworkTableEntry eventName, matchNumber;
 	
 	public static boolean loggerOn;
-	public static NetworkTable table,tempTable;
+	public static NetworkTable table,tempTable,fms;
 	public static NetworkTableInstance inst;
 
 	// manually created list, must be exactly as entered into SmartDashboard.
@@ -35,41 +38,50 @@ public class NerdyJSONLog {
 	// will store this in a configuration file as NetworkTable may not be available immediately and want to build gui to choose entries.
 	// load default table config file on start, can switch to other from gui?
 
-	public static String[] headings = { "Logger", "yaw", "Forward", "Rotation", "Strafe", 
-									"Velocity/0", "Velocity/1", "Velocity/2", "Velocity/3", "Velocity X", "Velocity Y",
+	
+	public static String[] headings = { "Logger", 
+									"yaw", "Forward", "Rotation", "Strafe", 
+									"Velocity/0", "Velocity/1", "Velocity/2", "Velocity/3", 
+									"Velocity X", "Velocity Y",
 									"desiredState_x", "desiredState_y", "Current_x", "Current_y",
 									"Feet Traveled/0", "Feet Traveled/1", "Feet Traveled/2", "Feet Traveled/3",
 									"Module Angle (Degrees)/0", "Module Angle (Degrees)/1", "Module Angle (Degrees)/2", "Module Angle (Degrees)/3"};
 
 
-	public static NetworkTableEntry Entry[] = new NetworkTableEntry[headings.length];
+	//public static String[] headings[] = new readlines();
+	
 
-	//***********************************************************************************
+
+
+
+	public static NetworkTableEntry Entry[] = new NetworkTableEntry[headings.length];
+	public static NetworkTableEntry eventNameEntry, matchNumberEntry, matchTypeEntry, isRedAllianceEntry, replayNumberEntry, stationNumberEntry;
+
+	//==============================================================================================================================================================
 	
 	public static void run() { 
+
+		readLines();
 
 		//configureList.createAndShowGUI();
 
 		inst = NetworkTableInstance.getDefault();
 		table = inst.getTable("SmartDashboard");
-		//fms = inst.getTable("FMSInfo");
-		//eventName = fms.getEntry("EventName");
-		//matchNumber = fms.getEntry("MatchNumber");
+		fms = inst.getTable("FMSInfo");
 
-		//***************************************************************************
 		// Initiate NetwrokTable entries by iterating a list array.
 		for (int i = 0; i < headings.length; i++) {
 			Entry[i] = table.getEntry(headings[i]);
 		}
-		//Velocity_XEntry   			= table.getEntry("Velocity X");
 
-		//*******************************************************************************
+		//  Connect to SmartDashboard server
+		//**********************************
 		//inst.startClientTeam(2337);  // team # or use inst.startClient("hostname") or similar
 		//inst.startDSClient();  // recommended if running on DS computer; this gets the robot IP from the DS
 		//inst.startClient("10.23.37.2");
-		inst.startClient("10.0.1.5");
+		inst.startClient("10.0.1.188");
 
-		loggerOn = false;	// This value is set to 'true' in Robot.init & then false at Robot.disable.
+			loggerOn = false;	// This value is set to 'true' in Robot.init & then false at Robot.disable.
 		System.out.println("LoggerOn: " + loggerOn + " - waiting on NetworkTables and/or Robot");
 		int i = 0;
 
@@ -79,6 +91,8 @@ public class NerdyJSONLog {
 			System.out.print("."); i = i + 1; if(i>100) {System.out.println("-"); i=0;}
 			sleepy();
 		}
+
+		retrieveKeys(); //???+++++++++++++++++++++++  need here, after server connects, to get info.  Plan is to deveop menu and use to set up default file for later use
 
 		initSB();	//Initialize the stringbuilder to add info to
 		IOInfoSB();	//Add initail entry to stringbuilder that Wildloger uses to recognize entries  //MAYBE MOVE THIS BEFOE PREVIOUS WHILE STATEMENT TO SAVE TIME
@@ -93,18 +107,45 @@ public class NerdyJSONLog {
 		}
 		finalStateSB();	// fix end of entries so that it is in the proper JSON format and then write to a text file.
 
-		//run();  //use this to run again.  incase robot disconnected, but also to get both auton and teleop since "Logger" boolean goes 'false' in disable
+		//run();  		//use this to run again.  incase robot disconnected, but also to get both auton and teleop since "Logger" boolean goes 'false' in disable
 	}
-
+//==============================================================================================================================================================
 	
 	/*
 	 *	Creates the time stamped file and initiates buffer writer to that file. (ok)
 	 * 
 	 */
 	public static void initSB() {
-				//eventName.getString("test") + (int) matchNumber.getDouble(0.0) + //maybe add to file title
+		String alliance;
+
+		// Get certain FMS info to add to file name for easier retrieval later.
+		eventNameEntry = fms.getEntry("EventName");
+			String eventName = eventNameEntry.getString("");
+				if (eventName == "") {eventName = "Premier";}
+		matchNumberEntry = fms.getEntry("MatchNumber");
+			double matchNumber = matchNumberEntry.getDouble(0.0);
+		matchTypeEntry = fms.getEntry("MatchType");
+			double matchType = matchTypeEntry.getDouble(0.0);
+		replayNumberEntry = fms.getEntry("ReplayNumber");
+			double replayNumber = replayNumberEntry.getDouble(0.0);
+		isRedAllianceEntry = fms.getEntry("isRedAlliance");
+			boolean isRedAlliance = isRedAllianceEntry.getBoolean(false);
+				if (isRedAlliance) {alliance = "Red";} else {alliance = "Blue";}
+		stationNumberEntry = fms.getEntry("StationNumber");
+			double stationNumber = stationNumberEntry.getDouble(0.0);
+
+		LocalDateTime now = LocalDateTime.now();
+			int month = now.getMonthValue();
+			int day = now.getDayOfMonth();
+			int hour = now.getHour();
+			int minute = now.getMinute();
+			int second = now.getSecond();
+
     	try {
-    		f = new File("/Users/Public/Documents/log" + System.currentTimeMillis() + ".txt");
+			//would like to add a folder but need to catch if folder doesnt exist
+			f = new File("/Users/Public/Documents/log_" 
+							+ eventName +"_"+ matchNumber +"_"+ matchType +"_"+ replayNumber +"_"+ alliance +"_"+ stationNumber +"_"
+							+ month  + "-"+ day + "_" + hour + "-" + minute + "-" + second + ".txt");  
     		if(!f.exists()){
     			f.createNewFile();
     		}
@@ -273,51 +314,85 @@ public class NerdyJSONLog {
 		builder.append("\"},");	
 	}
 
-// ==========================================================================================
-// experimental items, working on reading available SmartDashboard 'keys' (easy) & subtable 'keys' (working on) to creat a list for "headings"
+	// ==========================================================================================
+	// Retrieve available SmartDashboard headings & subtable headings as a String[] array.
+	//  integrate into a menu sysem to create defaulte file that can be loaded.
 
-	//retrieves main headings but not subheadings in subtables.
-	public static String[] retrieveKeys(){
+	//public static String[] retrieveKeys(){
+		public static void retrieveKeys(){
 
-		Set<String> sdKeys = table.getKeys();
+		// Retrieve SmartDashboard headings
+		Set<String> sdKeysSet = table.getKeys();
+		Object sdKeysObject[] = sdKeysSet.toArray();
 
-		Set<String> sdSubTables = table.getSubTables();
-		Set<String> stKeys;
- 
-		Object objects1[] = sdKeys.toArray();
-		Object objects2[] = sdSubTables.toArray();
+		// Convert Objects to Strings so that it can be used to call the subtables
+		String[] sdKeysString = Arrays.copyOf(sdKeysObject, sdKeysObject.length, String[].class);
 
-		String[] SDSubTablesString = Arrays.copyOf(objects2, objects2.length, String[].class);
-			for (String value2 : SDSubTablesString){
-				System.out.println(value2 + " stK1");
-				
-			}
-		///get subtable keys
+		// Retrieve names of subtables
+		Set<String> sdSubTablesSet = table.getSubTables();
+		Object sdSubTableObject[] = sdSubTablesSet.toArray();
+
+		// Convert Objects to Strings so that they may be used to call the subtable headings
+		String[] SDSubTablesString = Arrays.copyOf(sdSubTableObject, sdSubTableObject.length, String[].class);
+
+		//Set<String> stKeysSet;
+		// Create ArrayList that will initially hold all the heading names, from the main tbale and all subtables.
+		ArrayList<String> sdFullHeadingList = new ArrayList<String>();
+
+		// For each subtable, retrieve the headings.  Add the subtable name to each heading along with a "/", and then add tht to the ArrayList
 		for (String value : SDSubTablesString) {
 			tempTable = inst.getTable("SmartDashboard/"+value);
-			stKeys = tempTable.getKeys();
-			Object objects3[] = stKeys.toArray();
-				for (Object value3 : objects3)
-					System.out.println(value3 + " stK");
+			Set<String> stKeysSet = tempTable.getKeys();
+			Object stKeysObjects[] = stKeysSet.toArray();
+				for (Object value3 : stKeysObjects){
+					sdFullHeadingList.add(value + "/"+ value3);
+				}
 		}
 
+		// Add SmartDashboard main headings to ArrayList.
+		for (String value : sdKeysString) { sdFullHeadingList.add(value); }
 
+		// Convert ArrayList to a array of Objects
+		Object[] headingsObjects = sdFullHeadingList.toArray();
 
+		// Convert array of Objects to an array of Strings
+		String[] headings2 = Arrays.copyOf(headingsObjects, headingsObjects.length, String[].class);
 
-		Object both[] = Arrays.copyOf(objects1, objects1.length + objects2.length);
-		System.arraycopy(objects2, 0, both, objects1.length, objects2.length);
+		// Print for confirmation
+		//for (String value : headings2) { System.out.println(value); }
+		//System.out.println(sdFullHeadingList.size());
+		System.out.println(headings2.length);
 
-		System.out.println( "both arrays:" + both.length );
-		System.out.println( "size:" + sdKeys.size() );
-		
-		String[] headings = Arrays.copyOf(objects1, objects1.length, String[].class);
+	//return headings2;
+	}
+	//public static void readLines() throws IOException {
+	//	readLines("/Users/Public/Documents/LOGGER/default_list.txt");
+	//}
 
-		for (Object value : both)
-			System.out.println(value + " bt");
+	public static String[] readLines() {
+		try {
+        	FileReader fileReader = new FileReader("/Users/Public/Documents/LOGGER/default_list.txt");
+         
+        	BufferedReader bufferedReader = new BufferedReader(fileReader);
+        	List<String> lines = new ArrayList<String>();
+        	String line = null;
+         
+        	while ((line = bufferedReader.readLine()) != null) {
+				lines.add(line);
+        	}
+         
+        	bufferedReader.close();
+         
+			return lines.toArray(new String[lines.size()]);
 
-		return headings;
-		}
-
-
+		} catch (IOException e) {
+			System.err.println("Caught IOException (init fw): " + e.getMessage());
+			String[] fallback = { "Logger", "yaw", "Forward", "Rotation", "Strafe"};
+			return fallback;
+	 	}
+    }   
 	
+
+
+
 }
