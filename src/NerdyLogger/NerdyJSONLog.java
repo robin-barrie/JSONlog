@@ -78,13 +78,15 @@ public class NerdyJSONLog {
 		//**********************************
 		//inst.startClientTeam(2337);  // team # or use inst.startClient("hostname") or similar
 		//inst.startDSClient();  // recommended if running on DS computer; this gets the robot IP from the DS
-		//inst.startClient("10.23.37.2");
-		inst.startClient("10.0.1.188");
+		inst.startClient("10.23.37.2");
+		//inst.startClient("10.0.1.188");
 
 			loggerOn = false;	// This value is set to 'true' in Robot.init & then false at Robot.disable.
 		System.out.println("LoggerOn: " + loggerOn + " - waiting on NetworkTables and/or Robot");
 		int i = 0;
 
+		initSB();
+		
 		// waiting for the "Logger" entry on the SmartDashboard to read 'true'.
 		while(!loggerOn){
 			loggerOn = Entry[0].getBoolean(false);
@@ -94,7 +96,7 @@ public class NerdyJSONLog {
 
 		retrieveKeys(); //???+++++++++++++++++++++++  need here, after server connects, to get info.  Plan is to deveop menu and use to set up default file for later use
 
-		initSB();	//Initialize the stringbuilder to add info to
+		//initSB();	//Initialize the stringbuilder to add info to
 		IOInfoSB();	//Add initail entry to stringbuilder that Wildloger uses to recognize entries  //MAYBE MOVE THIS BEFOE PREVIOUS WHILE STATEMENT TO SAVE TIME
 
 		i=0;
@@ -107,7 +109,7 @@ public class NerdyJSONLog {
 		}
 		finalStateSB();	// fix end of entries so that it is in the proper JSON format and then write to a text file.
 
-		//run();  		//use this to run again.  incase robot disconnected, but also to get both auton and teleop since "Logger" boolean goes 'false' in disable
+		run();  		//use this to run again.  incase robot disconnected, but also to get both auton and teleop since "Logger" boolean goes 'false' in disable
 	}
 //==============================================================================================================================================================
 	
@@ -143,9 +145,10 @@ public class NerdyJSONLog {
 
     	try {
 			//would like to add a folder but need to catch if folder doesnt exist
-			f = new File("/Users/Public/Documents/log_" 
-							+ eventName +"_"+ matchNumber +"_"+ matchType +"_"+ replayNumber +"_"+ alliance +"_"+ stationNumber +"_"
-							+ month  + "-"+ day + "_" + hour + "-" + minute + "-" + second + ".txt");  
+			f = new File("/Users/Public/Documents/logs/log_" 
+							+ month  + "-"+ day + "_" + hour + "-" + minute + "-" + second
+							+ eventName +"_"+ matchNumber +"_"+ matchType +"_"+ replayNumber +"_"+ alliance +"_"+ stationNumber
+							+ ".txt");  
     		if(!f.exists()){
     			f.createNewFile();
     		}
