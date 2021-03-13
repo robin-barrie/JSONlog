@@ -45,7 +45,7 @@ public class NerdyJSONLog {
 									"Velocity X", "Velocity Y",
 									"desiredState_x", "desiredState_y", "Current_x", "Current_y",
 									"Feet Traveled/0", "Feet Traveled/1", "Feet Traveled/2", "Feet Traveled/3",
-									"Module Angle (Degrees)/0", "Module Angle (Degrees)/1", "Module Angle (Degrees)/2", "Module Angle (Degrees)/3"};
+									"Module Angle (Degrees)/0", "Module Angle (Degrees)/1", "Module Angle (Degrees)/2", "Module Angle (Degrees)/3", "curTime", "NO"};
 
 
 	//public static String[] headings[] = new readlines();
@@ -109,7 +109,7 @@ public class NerdyJSONLog {
 		}
 		finalStateSB();	// fix end of entries so that it is in the proper JSON format and then write to a text file.
 
-		run();  		//use this to run again.  incase robot disconnected, but also to get both auton and teleop since "Logger" boolean goes 'false' in disable
+		//run();  		//use this to run again.  incase robot disconnected, but also to get both auton and teleop since "Logger" boolean goes 'false' in disable
 	}
 //==============================================================================================================================================================
 	
