@@ -38,7 +38,7 @@ public class NerdyJSONLog {
 	// will store this in a configuration file as NetworkTable may not be available immediately and want to build gui to choose entries.
 	// load default table config file on start, can switch to other from gui?
 
-	
+	/*
 	public static String[] headings = { "Logger", 
 									"yaw", "Forward", "Rotation", "Strafe", 
 									"Velocity/0", "Velocity/1", "Velocity/2", "Velocity/3", 
@@ -47,21 +47,21 @@ public class NerdyJSONLog {
 									"Feet Traveled/0", "Feet Traveled/1", "Feet Traveled/2", "Feet Traveled/3",
 									"Module Angle (Degrees)/0", "Module Angle (Degrees)/1", "Module Angle (Degrees)/2", "Module Angle (Degrees)/3", "curTime", "NO"};
 
-
-	//public static String[] headings[] = new readlines();
+	*/
+	public static String[] headings;
 	
+	public static NetworkTableEntry Entry[];
 
-
-
-
-	public static NetworkTableEntry Entry[] = new NetworkTableEntry[headings.length];
 	public static NetworkTableEntry eventNameEntry, matchNumberEntry, matchTypeEntry, isRedAllianceEntry, replayNumberEntry, stationNumberEntry;
 
 	//==============================================================================================================================================================
 	
 	public static void run() { 
 
-		readLines();
+		headings = readLines();
+		Entry = new NetworkTableEntry[headings.length];
+
+		//readLines();
 
 		//configureList.createAndShowGUI();
 
@@ -76,10 +76,10 @@ public class NerdyJSONLog {
 
 		//  Connect to SmartDashboard server
 		//**********************************
-		//inst.startClientTeam(2337);  // team # or use inst.startClient("hostname") or similar
-		//inst.startDSClient();  // recommended if running on DS computer; this gets the robot IP from the DS
-		inst.startClient("10.23.37.2");
-		//inst.startClient("10.0.1.188");
+		//inst.startClientTeam(2337);  		// team # or use inst.startClient("hostname") or similar
+		//inst.startDSClient();  			// recommended if running on DS computer; this gets the robot IP from the DS
+		//inst.startClient("10.23.37.2");  	//SkillzBot
+		inst.startClient("10.0.1.188");  	//Robin's laptop running simulator
 
 			loggerOn = false;	// This value is set to 'true' in Robot.init & then false at Robot.disable.
 		System.out.println("LoggerOn: " + loggerOn + " - waiting on NetworkTables and/or Robot");
