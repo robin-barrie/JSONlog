@@ -60,18 +60,17 @@ public class NerdyJSONLog {
 	
 	public static void run() { 
 
-		headings = readLines();
+		builder.delete(0, builder.length()); 	//empty buffer if previously used
+		headings = readLines();					// get headings from text file
 		Entry = new NetworkTableEntry[headings.length];
 
-		//readLines();
-
-		//configureList.createAndShowGUI();
+		//configureList.createAndShowGUI(); //stole some code to try to create a menu system
 
 		inst = NetworkTableInstance.getDefault();
 		table = inst.getTable("SmartDashboard");
 		fms = inst.getTable("FMSInfo");
 
-		// Initiate NetwrokTable entries by iterating a list array.
+		// Initiate NetworkTable entries by iterating a list array.
 		for (int i = 0; i < headings.length; i++) {
 			Entry[i] = table.getEntry(headings[i]);
 		}
@@ -80,15 +79,15 @@ public class NerdyJSONLog {
 		//**********************************
 		//inst.startClientTeam(2337);  		// team # or use inst.startClient("hostname") or similar
 		//inst.startDSClient();  			// recommended if running on DS computer; this gets the robot IP from the DS
-		inst.startClient("10.23.37.2");  	//SkillzBot
-		//inst.startClient("10.0.1.160");  	//Robin's laptop running simulator
+		//inst.startClient("10.23.37.2");  	//SkillzBot
+		inst.startClient("10.0.1.81");  	//Robin's laptop running simulator
 
 			loggerOn = false;	// This value is set to 'true' in Robot.init & then false at Robot.disable.
 		System.out.println("LoggerOn: " + loggerOn + " - waiting on NetworkTables and/or Robot");
 		int i = 0;
 
-		initSB();
-		
+		//initSB();   //moved here to save time but creates empty file if logger doesnt start. Do we care?
+
 		// waiting for the "Logger" entry on the SmartDashboard to read 'true'.
 		while(!loggerOn){
 			loggerOn = Entry[0].getBoolean(false);
@@ -98,21 +97,26 @@ public class NerdyJSONLog {
 
 		retrieveKeys(); //???+++++++++++++++++++++++  need here, after server connects, to get info.  Plan is to deveop menu and use to set up default file for later use
 
-		//initSB();	//Initialize the stringbuilder to add info to
+		initSB();	//Initialize the stringbuilder to add info to
 		IOInfoSB();	//Add initail entry to stringbuilder that Wildloger uses to recognize entries  //MAYBE MOVE THIS BEFOE PREVIOUS WHILE STATEMENT TO SAVE TIME
 
 		i=0;
-		if(loggerOn) {System.out.println("Starting to log " + headings.length + " entries...");		} // need if?? cant get here unless it is true
-		while(loggerOn){														// maybe add if disconnected....so file closes properly at end of match.
-			loggerOn = Entry[0].getBoolean(false);
+		if(loggerOn) {System.out.println("Starting to log " + headings.length + " entries...");		} // need if??
+		while(loggerOn){				
 			stateSB(); // actual logging of current states
-			sleepy();  //pause 50 milliseconds
+			sleepy(20);  //pause x milliseconds, 50 by default
 			System.out.print("."); i = i + 1; if(i>100) {System.out.println("-"); i=0;}  //visual indicator its working.  take out in later iterations
+			loggerOn = Entry[0].getBoolean(false); // check to see if robot is disabled, to end logging.
+			if(!inst.isConnected()) {				// also stop logging if disconnected, like at the end of a match.
+				loggerOn = false;
+				Entry[0].setValue(false);
+				System.out.println("Closing file. Disconnected from NetworkTable.");
+			}
 		}
-		finalStateSB();	// fix end of entries so that it is in the proper JSON format and then write to a text file.
+		finalStateSB();	// Modify the end of the entries so that it is in the proper JSON format and then write to a text file.
 
 
-		//run();  		//need to reset values? unable to open file//use this to run again.  incase robot disconnected, but also to get both auton and teleop since "Logger" boolean goes 'false' in disable
+		run();  		//use this to run again.  incase robot disconnected, but also to get both auton and teleop since "Logger" boolean goes 'false' in disable
 	}
 //==============================================================================================================================================================
 	
@@ -330,7 +334,7 @@ public class NerdyJSONLog {
 
 	// ==========================================================================================
 	// Retrieve available SmartDashboard headings & subtable headings as a String[] array.
-	//  integrate into a menu sysem to create defaulte file that can be loaded.
+	//  integrate into a menu system to create default file that can be loaded.
 
 	//public static String[] retrieveKeys(){
 		public static void retrieveKeys(){
@@ -401,7 +405,7 @@ public class NerdyJSONLog {
 
 		} catch (IOException e) {
 			System.err.println("Caught IOException (init fw): " + e.getMessage());
-			String[] fallback = { "Logger", "yaw", "Forward", "Rotation", "Strafe"};
+			String[] fallback = { "Logger", "yaw", "Forward", "Rotation", "Strafe", "FALLBACK ENTRIES"};
 			return fallback;
 	 	}
     }   
