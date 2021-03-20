@@ -1,3 +1,5 @@
+// Working with JavaSE-1.8
+
 package NerdyLogger;
 
 import java.io.BufferedReader;
@@ -33,7 +35,7 @@ public class NerdyJSONLog {
 	public static NetworkTable table,tempTable,fms;
 	public static NetworkTableInstance inst;
 
-	// manually created list, must be exactly as entered into SmartDashboard.
+	// created list of headings from text file, must be exactly as entered into SmartDashboard.
 	// working on automagically creating by reading networktable headings nad subtable headings. 
 	// will store this in a configuration file as NetworkTable may not be available immediately and want to build gui to choose entries.
 	// load default table config file on start, can switch to other from gui?
@@ -78,8 +80,8 @@ public class NerdyJSONLog {
 		//**********************************
 		//inst.startClientTeam(2337);  		// team # or use inst.startClient("hostname") or similar
 		//inst.startDSClient();  			// recommended if running on DS computer; this gets the robot IP from the DS
-		//inst.startClient("10.23.37.2");  	//SkillzBot
-		inst.startClient("10.0.1.188");  	//Robin's laptop running simulator
+		inst.startClient("10.23.37.2");  	//SkillzBot
+		//inst.startClient("10.0.1.160");  	//Robin's laptop running simulator
 
 			loggerOn = false;	// This value is set to 'true' in Robot.init & then false at Robot.disable.
 		System.out.println("LoggerOn: " + loggerOn + " - waiting on NetworkTables and/or Robot");
@@ -109,7 +111,8 @@ public class NerdyJSONLog {
 		}
 		finalStateSB();	// fix end of entries so that it is in the proper JSON format and then write to a text file.
 
-		//run();  		//use this to run again.  incase robot disconnected, but also to get both auton and teleop since "Logger" boolean goes 'false' in disable
+
+		//run();  		//need to reset values? unable to open file//use this to run again.  incase robot disconnected, but also to get both auton and teleop since "Logger" boolean goes 'false' in disable
 	}
 //==============================================================================================================================================================
 	
@@ -146,8 +149,8 @@ public class NerdyJSONLog {
     	try {
 			//would like to add a folder but need to catch if folder doesnt exist
 			f = new File("/Users/Public/Documents/logs/log_" 
-							+ month  + "-"+ day + "_" + hour + "-" + minute + "-" + second
-							+ eventName +"_"+ matchNumber +"_"+ matchType +"_"+ replayNumber +"_"+ alliance +"_"+ stationNumber
+							+ month  + "-"+ day + "_" + hour + "-" + minute + "-" + second +"_"
+							+ eventName +"_mN"+ matchNumber +"_mT"+ matchType +"_rN"+ replayNumber +"_"+ alliance +"_sN"+ stationNumber
 							+ ".txt");  
     		if(!f.exists()){
     			f.createNewFile();
@@ -240,6 +243,14 @@ public class NerdyJSONLog {
 	public static void sleepy(){
 		try {
 			Thread.sleep(50);
+		  } catch (InterruptedException ex) {
+			System.out.println("sleep interrupted");
+			return;
+		  }
+	}
+	public static void sleepy(int milliseconds){
+		try {
+			Thread.sleep(milliseconds);
 		  } catch (InterruptedException ex) {
 			System.out.println("sleep interrupted");
 			return;
