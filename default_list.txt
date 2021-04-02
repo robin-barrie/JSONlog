@@ -1,0 +1,38 @@
+Logger
+yaw
+Forward
+Rotation
+Strafe
+Velocity/0
+Velocity/1
+Velocity/2
+Velocity/3
+Velocity X
+Velocity Y
+desiredState_x
+desiredState_y
+pathX
+pathY
+pathHeading
+Current_x
+Current_y
+robotX
+robotY
+robotHeading
+Feet Traveled/0
+Feet Traveled/1
+Feet Traveled/2
+Feet Traveled/3
+Module Angle (Degrees)/0
+Module Angle (Degrees)/1
+Module Angle (Degrees)/2
+Module Angle (Degrees)/3
+curTime
+desiredRotation
+UNdesiredRotation
+Current_Rotation
+Current_Timer
+Pigeon Accl X
+Pigeon Accl Y
+Pigeon Accl Z
+LogFile2
