@@ -1,9 +1,14 @@
+// Working with JavaSE-1.8
+
 package NerdyLogger;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.*;
 
 import edu.wpi.first.networktables.NetworkTable;
@@ -27,102 +32,130 @@ public class NerdyJSONLog {
 	//public static NetworkTableEntry eventName, matchNumber;
 	
 	public static boolean loggerOn;
-	public static NetworkTable table,tempTable;
+	public static NetworkTable table,tempTable,fms;
 	public static NetworkTableInstance inst;
 
-	//***********************************************************************************
-	//  There are 4 areas that need to be updated for each item that is to be logged.
-	//  This includes the two below, as well as IOInfoSB() & stateSB().
-	//***********************************************************************************
-	public static NetworkTableEntry loggerEntry, isFieldOrientedEntry,
-	yawEntry, RotationEntry, ForwardEntry, StrafeEntry, 
-	Velocity_0Entry, Velocity_1Entry, Velocity_2Entry, Velocity_3Entry, Velocity_XEntry, Velocity_YEntry,
-	desiredState_xEntry, desiredState_yEntry, Current_xEntry, Current_yEntry,
-	testValue1Entry, testValue2Entry, testValue3Entry, testValue4Entry, testValue5Entry, testValue6Entry;
-	//***********************************************************************************
+	// created list of headings from text file, must be exactly as entered into SmartDashboard.
+	// working on automagically creating by reading networktable headings nad subtable headings. 
+	// will store this in a configuration file as NetworkTable may not be available immediately and want to build gui to choose entries.
+	// load default table config file on start, can switch to other from gui?
+
+	/*
+	public static String[] headings = { "Logger", 
+									"yaw", "Forward", "Rotation", "Strafe", 
+									"Velocity/0", "Velocity/1", "Velocity/2", "Velocity/3", 
+									"Velocity X", "Velocity Y",
+									"desiredState_x", "desiredState_y", "Current_x", "Current_y",
+									"Feet Traveled/0", "Feet Traveled/1", "Feet Traveled/2", "Feet Traveled/3",
+									"Module Angle (Degrees)/0", "Module Angle (Degrees)/1", "Module Angle (Degrees)/2", "Module Angle (Degrees)/3", "curTime", "NO"};
+
+	*/
+	public static String[] headings;
 	
+	public static NetworkTableEntry Entry[];
+
+	public static NetworkTableEntry eventNameEntry, matchNumberEntry, matchTypeEntry, isRedAllianceEntry, replayNumberEntry, stationNumberEntry;
+
+	//==============================================================================================================================================================
 	
 	public static void run() { 
 
-		//configureList.createAndShowGUI();
+		builder.delete(0, builder.length()); 	//empty buffer if previously used
+		headings = readLines();					// get headings from text file
+		Entry = new NetworkTableEntry[headings.length];
+
+		//configureList.createAndShowGUI(); //stole some code to try to create a menu system
 
 		inst = NetworkTableInstance.getDefault();
 		table = inst.getTable("SmartDashboard");
-		//fms = inst.getTable("FMSInfo");
-		//eventName = fms.getEntry("EventName");
-		//matchNumber = fms.getEntry("MatchNumber");
-		
-		//*******************************************************************************
-		loggerEntry					= table.getEntry("Logger");
-		yawEntry					= table.getEntry("yaw");
-		isFieldOrientedEntry		= table.getEntry("isFieldOriented");
-		ForwardEntry				= table.getEntry("Forward");
-		RotationEntry				= table.getEntry("Rotation");
-		StrafeEntry					= table.getEntry("Strafe");
-		desiredState_xEntry   		= table.getEntry("desiredState_x");
-		desiredState_yEntry   		= table.getEntry("desiredState_y");
-		Current_xEntry   			= table.getEntry("Current_x");
-		Current_yEntry   			= table.getEntry("Current_y");//Velocity/0
-		Velocity_XEntry   			= table.getEntry("Velocity X");
-		Velocity_YEntry   			= table.getEntry("Velocity Y");
-		Velocity_0Entry				= table.getEntry("Velocity/0");
-		Velocity_1Entry				= table.getEntry("Velocity/1");
-		Velocity_2Entry				= table.getEntry("Velocity/2");
-		Velocity_3Entry				= table.getEntry("Velocity/3");
-		testValue1Entry				= table.getEntry("testValue1");
-		testValue2Entry				= table.getEntry("testValue2");
-		testValue3Entry				= table.getEntry("testValue3");
-		testValue4Entry				= table.getEntry("testValue4");
-		testValue5Entry				= table.getEntry("testValue5");
-		testValue6Entry				= table.getEntry("testValue6");
-		//*******************************************************************************
-		
-		//inst.startClientTeam(2337);  // team # or use inst.startClient("hostname") or similar
-		//inst.startDSClient();  // recommended if running on DS computer; this gets the robot IP from the DS
-		//inst.startClient("10.23.37.2");
-		inst.startClient("10.0.1.49");
+		fms = inst.getTable("FMSInfo");
 
-		loggerOn = false;	// This value is set to 'true' in Robot.init & then false at Robot.disable.
+		// Initiate NetworkTable entries by iterating a list array.
+		for (int i = 0; i < headings.length; i++) {
+			Entry[i] = table.getEntry(headings[i]);
+		}
+
+		//  Connect to SmartDashboard server
+		//**********************************
+		//inst.startClientTeam(2337);  		// team # or use inst.startClient("hostname") or similar
+		//inst.startDSClient();  			// recommended if running on DS computer; this gets the robot IP from the DS
+		//inst.startClient("10.23.37.2");  	//SkillzBot
+		inst.startClient("10.0.1.81");  	//Robin's laptop running simulator
+
+			loggerOn = false;	// This value is set to 'true' in Robot.init & then false at Robot.disable.
 		System.out.println("LoggerOn: " + loggerOn + " - waiting on NetworkTables and/or Robot");
 		int i = 0;
 
-		System.out.print( loggerEntry.getBoolean(false) );
+		//initSB();   //moved here to save time but creates empty file if logger doesnt start. Do we care?
 
+		// waiting for the "Logger" entry on the SmartDashboard to read 'true'.
 		while(!loggerOn){
-			loggerOn = loggerEntry.getBoolean(false);
+			loggerOn = Entry[0].getBoolean(false);
 			System.out.print("."); i = i + 1; if(i>100) {System.out.println("-"); i=0;}
 			sleepy();
-			//System.out.print( loggerEntry.getBoolean(false) );
-			//System.out.print( yawEntry.getDouble(1) );
 		}
-		initSB();
-		IOInfoSB();
 
-		//retrieveKeys(); //get keys from Smartdashboard and try to automatically set up fields.
+		retrieveKeys(); //???+++++++++++++++++++++++  need here, after server connects, to get info.  Plan is to deveop menu and use to set up default file for later use
 
+		initSB();	//Initialize the stringbuilder to add info to
+		IOInfoSB();	//Add initail entry to stringbuilder that Wildloger uses to recognize entries  //MAYBE MOVE THIS BEFOE PREVIOUS WHILE STATEMENT TO SAVE TIME
 
 		i=0;
-		if(loggerOn) {System.out.println("Begin logging..");} //need if??
-		while(loggerOn){
-			loggerOn = loggerEntry.getBoolean(false);
-			stateSB();
-			sleepy();		
-			System.out.print("."); i = i + 1; if(i>100) {System.out.println("-"); i=0;}
+		if(loggerOn) {System.out.println("Starting to log " + headings.length + " entries...");		} // need if??
+		while(loggerOn){				
+			stateSB(); // actual logging of current states
+			sleepy(20);  //pause x milliseconds, 50 by default
+			System.out.print("."); i = i + 1; if(i>100) {System.out.println("-"); i=0;}  //visual indicator its working.  take out in later iterations
+			loggerOn = Entry[0].getBoolean(false); // check to see if robot is disabled, to end logging.
+			if(!inst.isConnected()) {				// also stop logging if disconnected, like at the end of a match.
+				loggerOn = false;
+				Entry[0].setValue(false);
+				System.out.println("Closing file. Disconnected from NetworkTable.");
+			}
 		}
-		finalStateSB();	
+		finalStateSB();	// Modify the end of the entries so that it is in the proper JSON format and then write to a text file.
 
-		//run();
+
+		run();  		//use this to run again.  incase robot disconnected, but also to get both auton and teleop since "Logger" boolean goes 'false' in disable
 	}
-
+//==============================================================================================================================================================
 	
 	/*
 	 *	Creates the time stamped file and initiates buffer writer to that file. (ok)
 	 * 
 	 */
 	public static void initSB() {
-				//eventName.getString("test") + (int) matchNumber.getDouble(0.0) + //maybe add to file title
+		String alliance;
+
+		// Get certain FMS info to add to file name for easier retrieval later.
+		eventNameEntry = fms.getEntry("EventName");
+			String eventName = eventNameEntry.getString("");
+				if (eventName == "") {eventName = "Premier";}
+		matchNumberEntry = fms.getEntry("MatchNumber");
+			double matchNumber = matchNumberEntry.getDouble(0.0);
+		matchTypeEntry = fms.getEntry("MatchType");
+			double matchType = matchTypeEntry.getDouble(0.0);
+		replayNumberEntry = fms.getEntry("ReplayNumber");
+			double replayNumber = replayNumberEntry.getDouble(0.0);
+		isRedAllianceEntry = fms.getEntry("isRedAlliance");
+			boolean isRedAlliance = isRedAllianceEntry.getBoolean(false);
+				if (isRedAlliance) {alliance = "Red";} else {alliance = "Blue";}
+		stationNumberEntry = fms.getEntry("StationNumber");
+			double stationNumber = stationNumberEntry.getDouble(0.0);
+
+		LocalDateTime now = LocalDateTime.now();
+			int month = now.getMonthValue();
+			int day = now.getDayOfMonth();
+			int hour = now.getHour();
+			int minute = now.getMinute();
+			int second = now.getSecond();
+
     	try {
-    		f = new File("/Users/Public/Documents/Logs/log" + System.currentTimeMillis() + ".txt");
+			//would like to add a folder but need to catch if folder doesnt exist
+			f = new File("/Users/Public/Documents/logs/log_" 
+							+ month  + "-"+ day + "_" + hour + "-" + minute + "-" + second +"_"
+							+ eventName +"_mN"+ matchNumber +"_mT"+ matchType +"_rN"+ replayNumber +"_"+ alliance +"_sN"+ stationNumber
+							+ ".txt");  
     		if(!f.exists()){
     			f.createNewFile();
     		}
@@ -134,6 +167,7 @@ public class NerdyJSONLog {
     	
 		try  {
 			bw_file.write(builder.toString());
+			System.out.println();
 			System.out.println("Successfully Created File..."+f);
 		}catch (IOException e) {
 		    System.err.println("Caught IOException (init bw): " + e.getMessage());
@@ -152,44 +186,19 @@ public class NerdyJSONLog {
 		// Add a line for every item to be logged.  
 		// Last entry has a unique ending
 		//
-		//  Maybe in future, read in details from an array, guarantees names match and only one place to edit****************
 		
 		builder.append("{\"ioinfo\":[");
 		
-		//*******************************************************************************
-		addIOInfo("Logger"					, "", "Input", "");
-		addIOInfo("isFieldOriented" 		, "", "Input", "");
-		addIOInfo("yaw"						, "", "Input", "");
-		addIOInfo("Forward"					, "", "Input", "");
-		addIOInfo("Rotation"				, "", "Input", "");
-		addIOInfo("Strafe"					, "", "Input", "");
-		addIOInfo("desiredState_x"			, "", "Input", "");
-		addIOInfo("desiredState_y"			, "", "Input", "");
-		addIOInfo("Current_x"				, "", "Input", "");
-		addIOInfo("Current_y"				, "", "Input", "");
-		addIOInfo("Velocity X"		 		, "", "Input", "");
-		addIOInfo("Velocity Y"				, "", "Input", "");
-		addIOInfo("Velocity/0"				, "", "Input", "");
-		addIOInfo("Velocity/1"				, "", "Input", "");
-		addIOInfo("Velocity/2"				, "", "Input", "");
-		addIOInfo("Velocity/3"				, "", "Input", "");
-		addIOInfo("testValue1"				, "", "Input", "");
-		addIOInfo("testValue2"				, "", "Input", "");
-		addIOInfo("testValue3"				, "", "Input", "");
-		addIOInfo("testValue4"				, "", "Input", "");
-		addIOInfo("testValue5"				, "", "Input", "");
-		addIOInfo("testValue6"				, "", "Input", "");
-		//*******************************************************************************
+		// Add entries by iterating a list array.
+		for (int i = 0; i < headings.length; i++) {
+			addIOInfo(headings[i]			,"", "Input", "");
+		}
 		
 		builder.setLength(Math.max(builder.length() - 1,0));  	//remove comma from last entry.
 		builder.append("\n\t]");								//close out ioinfo entry.
 		builder.append("\n\"state\":[");						//start state entries.
 	}
 
-
-	// future:? to add items to IOInfo from array, or keep as is, adding all elements in one method.????
-
-	
 	public static void addIOInfo(String name, String type, String direction, String port) {
 		
 		String m_name = name;
@@ -216,8 +225,7 @@ public class NerdyJSONLog {
 	 * 	Writes "builder" to bufferWriter(bw) and then closes bw so that it writes to file.
 	 * 
 	 */
-	
-	public static void finalStateSB() {
+		public static void finalStateSB() {
 		builder.setLength(Math.max(builder.length() - 1,0));  	// removes comma from last entry.
 		builder.append("\n\t] \n}");							// closes out JSON format
  
@@ -225,12 +233,17 @@ public class NerdyJSONLog {
 			if(bw_file!=null)
 			bw_file.write(builder.toString());
 			 bw_file.close();
+			 System.out.println();
 			System.out.println("Successfully edited JSON and closed file..(finalStateSB).");
 		 }catch(Exception ex){
 		       System.out.println("Error in closing the BufferedWriter"+ex);
 		    }
 	}
 
+	/*
+	 *	adds slight pause between State entries while actively logging.
+	 * 
+	 */
 	public static void sleepy(){
 		try {
 			Thread.sleep(50);
@@ -239,37 +252,29 @@ public class NerdyJSONLog {
 			return;
 		  }
 	}
+	public static void sleepy(int milliseconds){
+		try {
+			Thread.sleep(milliseconds);
+		  } catch (InterruptedException ex) {
+			System.out.println("sleep interrupted");
+			return;
+		  }
+	}
 
-		//*************************************figure out best way to write stateSB****  all in one our array to method**** */
-	
+	/*
+	 *	Adds actual log entries of the current states while "Logger" is 'true'
+	 * 
+	 */
 	public static void stateSB() {  
 		
 		builder.append("\n\t{\"timestamp\":\"" + System.currentTimeMillis() + "\",\"values\":[");
 		
-		//***************************************************************************************
-		addState("Logger",				"Logger"				,loggerEntry.getBoolean(false));
-		addState("isFieldOriented",		"isFieldOriented"		,isFieldOrientedEntry.getBoolean(false));
-		addState("yaw",					"yaw"					,yawEntry.getDouble(0.0));
-		addState("Forward",				"Forward"				,ForwardEntry.getDouble(0.0));
-		addState("Rotation",			"Rotation"				,RotationEntry.getDouble(0.0));
-		addState("Strafe",				"Strafe"				,StrafeEntry.getDouble(0.0));
-		addState("desiredState_x",		"desiredState_x"		,desiredState_xEntry.getDouble(0.0));
-		addState("desiredState_y",		"desiredState_y"		,desiredState_yEntry.getDouble(0.0));
-		addState("Current_x",			"Current_x"				,Current_xEntry.getDouble(0.0));
-		addState("Current_y",			"Current_y"				,Current_yEntry.getDouble(0.0));
-		addState("Velocity X",			"Velocity X"			,Velocity_XEntry.getDouble(0.0));
-		addState("Velocity Y",			"Velocity Y"			,Velocity_YEntry.getDouble(0.0));
-		addState("Velocity/0",			"Velocity/0"			,Velocity_0Entry.getDouble(0.0));
-		addState("Velocity/1",			"Velocity/1"			,Velocity_1Entry.getDouble(0.0));
-		addState("Velocity/2",			"Velocity/2"			,Velocity_2Entry.getDouble(0.0));
-		addState("Velocity/3",			"Velocity/3"			,Velocity_3Entry.getDouble(0.0));
-		addState("testValue1",			"testValue1"			,testValue1Entry.getDouble(0.0));
-		addState("testValue2",			"testValue2"			,testValue2Entry.getDouble(0.0));
-		addState("testValue3",			"testValue3"			,testValue3Entry.getDouble(0.0));
-		addState("testValue4",			"testValue4"			,testValue4Entry.getDouble(0.0));
-		addState("testValue5",			"testValue5"			,testValue5Entry.getDouble(0.0));
-		addState("testValue6",			"testValue6"			,testValue6Entry.getDouble(0.0));
-		//***************************************************************************************
+		// Add entries by iterating a list array, but get first entry ("Logger") as it is a Boolean.  maybe set up different section for Booleans later
+			addState(headings[0],		headings[0]				,Entry[0].getBoolean(false));
+
+		for (int i = 1; i < headings.length; i++) {
+			addState(headings[i],		headings[i]				,Entry[i].getDouble(0.0));
+		}
 
 		builder.setLength(Math.max(builder.length() - 1,0));  	//removes comma from last entry.
 		builder.append("\n\t\t] },");							//closes out state entry.
@@ -327,48 +332,85 @@ public class NerdyJSONLog {
 		builder.append("\"},");	
 	}
 
-	//retrieves main headings but nut subheadings in subtables.
-	public static String[] retrieveKeys(){
+	// ==========================================================================================
+	// Retrieve available SmartDashboard headings & subtable headings as a String[] array.
+	//  integrate into a menu system to create default file that can be loaded.
 
-		Set<String> sdKeys = table.getKeys();
+	//public static String[] retrieveKeys(){
+		public static void retrieveKeys(){
 
-		Set<String> sdSubTables = table.getSubTables();
-		Set<String> stKeys;
- 
-		Object objects1[] = sdKeys.toArray();
-		Object objects2[] = sdSubTables.toArray();
+		// Retrieve SmartDashboard headings
+		Set<String> sdKeysSet = table.getKeys();
+		Object sdKeysObject[] = sdKeysSet.toArray();
 
-		String[] SDSubTablesString = Arrays.copyOf(objects2, objects2.length, String[].class);
-			for (String value2 : SDSubTablesString){
-				System.out.println(value2 + " stK1");
-				
-			}
-		///get subtable keys
+		// Convert Objects to Strings so that it can be used to call the subtables
+		String[] sdKeysString = Arrays.copyOf(sdKeysObject, sdKeysObject.length, String[].class);
+
+		// Retrieve names of subtables
+		Set<String> sdSubTablesSet = table.getSubTables();
+		Object sdSubTableObject[] = sdSubTablesSet.toArray();
+
+		// Convert Objects to Strings so that they may be used to call the subtable headings
+		String[] SDSubTablesString = Arrays.copyOf(sdSubTableObject, sdSubTableObject.length, String[].class);
+
+		//Set<String> stKeysSet;
+		// Create ArrayList that will initially hold all the heading names, from the main tbale and all subtables.
+		ArrayList<String> sdFullHeadingList = new ArrayList<String>();
+
+		// For each subtable, retrieve the headings.  Add the subtable name to each heading along with a "/", and then add tht to the ArrayList
 		for (String value : SDSubTablesString) {
 			tempTable = inst.getTable("SmartDashboard/"+value);
-			stKeys = tempTable.getKeys();
-			Object objects3[] = stKeys.toArray();
-				for (Object value3 : objects3)
-					System.out.println(value3 + " stK");
+			Set<String> stKeysSet = tempTable.getKeys();
+			Object stKeysObjects[] = stKeysSet.toArray();
+				for (Object value3 : stKeysObjects){
+					sdFullHeadingList.add(value + "/"+ value3);
+				}
 		}
 
+		// Add SmartDashboard main headings to ArrayList.
+		for (String value : sdKeysString) { sdFullHeadingList.add(value); }
 
+		// Convert ArrayList to a array of Objects
+		Object[] headingsObjects = sdFullHeadingList.toArray();
 
+		// Convert array of Objects to an array of Strings
+		String[] headings2 = Arrays.copyOf(headingsObjects, headingsObjects.length, String[].class);
 
-		Object both[] = Arrays.copyOf(objects1, objects1.length + objects2.length);
-		System.arraycopy(objects2, 0, both, objects1.length, objects2.length);
+		// Print for confirmation
+		//for (String value : headings2) { System.out.println(value); }
+		//System.out.println(sdFullHeadingList.size());
+		System.out.println(headings2.length);
 
-		System.out.println( "both arrays:" + both.length );
-		System.out.println( "size:" + sdKeys.size() );
-		
-		String[] headings = Arrays.copyOf(objects1, objects1.length, String[].class);
+	//return headings2;
+	}
+	//public static void readLines() throws IOException {
+	//	readLines("/Users/Public/Documents/LOGGER/default_list.txt");
+	//}
 
-		for (Object value : both)
-			System.out.println(value + " bt");
+	public static String[] readLines() {
+		try {
+        	FileReader fileReader = new FileReader("/Users/Public/Documents/LOGGER/default_list.txt");
+         
+        	BufferedReader bufferedReader = new BufferedReader(fileReader);
+        	List<String> lines = new ArrayList<String>();
+        	String line = null;
+         
+        	while ((line = bufferedReader.readLine()) != null) {
+				lines.add(line);
+        	}
+         
+        	bufferedReader.close();
+         
+			return lines.toArray(new String[lines.size()]);
 
-		return headings;
-		}
-
-
+		} catch (IOException e) {
+			System.err.println("Caught IOException (init fw): " + e.getMessage());
+			String[] fallback = { "Logger", "yaw", "Forward", "Rotation", "Strafe", "FALLBACK ENTRIES"};
+			return fallback;
+	 	}
+    }   
 	
+
+
+
 }
