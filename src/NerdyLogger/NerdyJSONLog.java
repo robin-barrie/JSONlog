@@ -15,6 +15,8 @@ import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 
+import NerdyLogger.Menu;
+
 public class NerdyJSONLog {
 
 	public static ConfigureList configureList; 
@@ -60,6 +62,17 @@ public class NerdyJSONLog {
 	
 	public static void run() { 
 
+		Menu.createAndShowGUI();
+		if (Menu.getAction() == "Start Logger"){
+			System.out.println("started");
+            NerdyJSONLog.runLogger();
+        }
+		System.out.println("1");
+		System.out.println("1");
+	}
+
+	public static void runLogger(){
+
 		builder.delete(0, builder.length()); 	//empty buffer if previously used
 		headings = readLines();					// get headings from text file
 		Entry = new NetworkTableEntry[headings.length];
@@ -101,6 +114,7 @@ public class NerdyJSONLog {
 		IOInfoSB();	//Add initail entry to stringbuilder that Wildloger uses to recognize entries  //MAYBE MOVE THIS BEFOE PREVIOUS WHILE STATEMENT TO SAVE TIME
 
 		i=0;
+
 		if(loggerOn) {System.out.println("Starting to log " + headings.length + " entries...");		} // need if??
 		while(loggerOn){				
 			stateSB(); // actual logging of current states
@@ -116,7 +130,7 @@ public class NerdyJSONLog {
 		finalStateSB();	// Modify the end of the entries so that it is in the proper JSON format and then write to a text file.
 
 
-		run();  		//use this to run again.  incase robot disconnected, but also to get both auton and teleop since "Logger" boolean goes 'false' in disable
+		//run();  		//use this to run again.  incase robot disconnected, but also to get both auton and teleop since "Logger" boolean goes 'false' in disable
 	}
 //==============================================================================================================================================================
 	
