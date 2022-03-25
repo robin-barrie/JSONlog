@@ -15,11 +15,12 @@ import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 
-import NerdyLogger.Menu;
-
 public class NerdyJSONLog {
 
-	public static ConfigureList configureList; 
+	public static ConfigureList configureList;
+	static Menu menu = new Menu();
+
+
 	public static void main(String[] args)  {
 
 		configureList = new ConfigureList();
@@ -62,13 +63,43 @@ public class NerdyJSONLog {
 	
 	public static void run() { 
 
+		System.out.println("test0");
+
 		Menu.createAndShowGUI();
-		if (Menu.getAction() == "Start Logger"){
+
+           System.out.println("test1");
+		String action = null;
+		while(true){
+           System.out.print(menu.getAction());
+		if(menu.getAction()==null){action = "";} else {action = menu.getAction().toString();}
+		System.out.print(action);
+		if (action == "Start_Logger"){
 			System.out.println("started");
-            NerdyJSONLog.runLogger();
+            //NerdyJSONLog.runLogger();
         }
-		System.out.println("1");
-		System.out.println("1");
+
+		//if(action == null){ System.out.print(".");}
+		if(action != ""){
+
+			System.out.print("action does not = null but = ");
+			System.out.println(menu.getAction());
+
+		switch(action){
+			case "Start_Logger":
+			   System.out.println("starting");
+			   menu.setAction(null);
+			   break;
+			case "Save":
+			   //do logic
+			   break;
+			case "Exit":
+			   System.out.println("exiting");
+			   System.exit(0);
+			   break;
+	    }
+	    }
+
+	    }
 	}
 
 	public static void runLogger(){
