@@ -1,0 +1,8 @@
+Add menu:
+    to select IP/driver Station etc to connect to for Smartdashboard data
+Add menu:
+    to grab headers from running robot and save file as possible headings
+Can't interupt/stop while trying to connect to server but can i stop later from menu?
+ConfigureList.java work on to read possbile headings and save a subset of possible / mayb set as default too
+move system.out prints to print in menu window
+menu item to launch log viewer, and then try to stop ( or not needed as can just close)

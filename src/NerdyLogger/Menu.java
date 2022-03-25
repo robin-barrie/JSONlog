@@ -27,7 +27,7 @@ public class Menu implements ActionListener, ItemListener {
     JScrollPane scrollPane;
     String newline = "\n";
 
-    public enum action {Start_Logger, Exit, Save};
+    public enum action {Start_Logger, Stop_Logger, Exit, Save, Configure_List};
     public action menuAction;
 
     public JMenuBar createMenuBar() {
@@ -47,8 +47,10 @@ public class Menu implements ActionListener, ItemListener {
                 "The only menu in this program that has menu items");
         menuBar.add(menu);
 
+        ImageIcon icon = createImageIcon("middle.gif");
+
         //a group of JMenuItems
-        menuItem = new JMenuItem(menuAction.Start_Logger.toString());
+        menuItem = new JMenuItem(menuAction.Start_Logger.toString(), icon);
         //menuItem.setMnemonic(KeyEvent.VK_T); //used constructor instead
         menuItem.setAccelerator(KeyStroke.getKeyStroke(
                 KeyEvent.VK_S, ActionEvent.ALT_MASK));
@@ -56,15 +58,19 @@ public class Menu implements ActionListener, ItemListener {
                 "This should start Logger");
         menuItem.addActionListener(this);
         menu.add(menuItem);
-
-        ImageIcon icon = createImageIcon("images/middle.gif");
-        menuItem = new JMenuItem(menuAction.Exit.toString(), icon);
-        menuItem.setMnemonic(KeyEvent.VK_B);
+        
+        menuItem = new JMenuItem(menuAction.Stop_Logger.toString(), icon);
+        //menuItem.setMnemonic(KeyEvent.VK_D);
         menuItem.addActionListener(this);
         menu.add(menuItem);
-
-        menuItem = new JMenuItem(icon);
-        menuItem.setMnemonic(KeyEvent.VK_D);
+        
+        menuItem = new JMenuItem(menuAction.Configure_List.toString());
+        //menuItem.setMnemonic(KeyEvent.VK_D);
+        menuItem.addActionListener(this);
+        menu.add(menuItem);
+        
+        menuItem = new JMenuItem(menuAction.Exit.toString());
+        //menuItem.setMnemonic(KeyEvent.VK_B);
         menuItem.addActionListener(this);
         menu.add(menuItem);
 
@@ -198,13 +204,13 @@ public class Menu implements ActionListener, ItemListener {
         return classString.substring(dotIndex+1);
     }
 
-    /** Returns an ImageIcon, or null if the path was invalid. */
-    protected static ImageIcon createImageIcon(String path) {
-        java.net.URL imgURL = Menu.class.getResource(path);
+    /** Returns an ImageIcon, or null if the name was invalid. */
+    protected static ImageIcon createImageIcon(String name) {
+        java.net.URL imgURL = Menu.class.getResource("images/"+name);
         if (imgURL != null) {
             return new ImageIcon(imgURL);
         } else {
-            System.err.println("Couldn't find file: " + path);
+            System.err.println("Couldn't find file: " + name);
             return null;
         }
     }
@@ -214,6 +220,17 @@ public class Menu implements ActionListener, ItemListener {
         case Start_Logger:
            System.out.println("starting");
            menuAction = null;
+           NerdyJSONLog.t.start();
+           break;
+        case Stop_Logger:
+           System.out.println("stopping");
+           menuAction = null;
+           NerdyJSONLog.t.stop();
+           break;
+        case Configure_List:
+           System.out.println("configuring list??");
+           menuAction = null;
+           //launch ConfiureList.java ??
            break;
         case Save:
            //do logic

@@ -18,11 +18,22 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 public class NerdyJSONLog {
 
 	public static ConfigureList configureList;
-	static Menu menu = new Menu();
+	public static Menu menu;
+
+	public static Thread t = new Thread(new Runnable() {
+		@Override
+		public void run() {
+			 // Insert some method call here.
+			 runLogger();
+		}
+	}
+	);
 
 	public static void main(String[] args)  {
 
 		configureList = new ConfigureList();
+		menu = new Menu();
+
 
 		NerdyJSONLog.run();
 	}
@@ -62,8 +73,11 @@ public class NerdyJSONLog {
 	
 	public static void run() { 
 
-		Menu.createAndShowGUI();
+
+
+		menu.createAndShowGUI();
 		//Listener listens and the repsonds based on switch case (in Menu)
+
 	}
 
 	public static void runLogger(){
@@ -72,7 +86,7 @@ public class NerdyJSONLog {
 		headings = readLines();					// get headings from text file
 		Entry = new NetworkTableEntry[headings.length];
 
-		//configureList.createAndShowGUI(); //stole some code to try to create a menu system
+		//configureList.createAndShowGUI(); //'borrowed' some code to try to create a menu system
 
 		inst = NetworkTableInstance.getDefault();
 		table = inst.getTable("SmartDashboard");

@@ -1,4 +1,6 @@
 #
+WORK IN PROGRESS
+
 This program can log entries from SmartDashboard and save them as a JSON files to be viewed later on the Wildlog viewer.
 
 Open the logger with VSCode(wpi version) and then run as simulation with F5. 
