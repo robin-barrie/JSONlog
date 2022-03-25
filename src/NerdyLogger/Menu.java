@@ -27,7 +27,8 @@ public class Menu implements ActionListener, ItemListener {
     JScrollPane scrollPane;
     String newline = "\n";
 
-    public static String action;
+    enum action {Start_Logger, Exit};
+    action menuAction;
 
     public JMenuBar createMenuBar() {
         JMenuBar menuBar;
@@ -47,8 +48,7 @@ public class Menu implements ActionListener, ItemListener {
         menuBar.add(menu);
 
         //a group of JMenuItems
-        menuItem = new JMenuItem("Start Logger",
-                                 KeyEvent.VK_S);
+        menuItem = new JMenuItem(menuAction.Start_Logger.toString());
         //menuItem.setMnemonic(KeyEvent.VK_T); //used constructor instead
         menuItem.setAccelerator(KeyStroke.getKeyStroke(
                 KeyEvent.VK_S, ActionEvent.ALT_MASK));
@@ -58,7 +58,7 @@ public class Menu implements ActionListener, ItemListener {
         menu.add(menuItem);
 
         ImageIcon icon = createImageIcon("images/middle.gif");
-        menuItem = new JMenuItem("Both text and icon", icon);
+        menuItem = new JMenuItem(menuAction.Exit.toString(), icon);
         menuItem.setMnemonic(KeyEvent.VK_B);
         menuItem.addActionListener(this);
         menu.add(menuItem);
@@ -148,11 +148,15 @@ public class Menu implements ActionListener, ItemListener {
         output.append(s + newline);
         output.setCaretPosition(output.getDocument().getLength());
         
-        if (source.getText()=="Start Logger"){
-            NerdyJSONLog.runLogger();
+        setAction(menuAction.valueOf(source.getText()));
+        
+        if (source.getText()=="Start_Logger"){
+           // NerdyJSONLog.runLogger();
+           System.out.println("good");
         }
         
-        System.out.println("3");
+        
+        System.out.println("Menu action listner hears: "+getAction().toString());
     }
 
     public void itemStateChanged(ItemEvent e) {
@@ -167,6 +171,9 @@ public class Menu implements ActionListener, ItemListener {
                      "selected":"unselected");
         output.append(s + newline);
         output.setCaretPosition(output.getDocument().getLength());
+
+        setAction(menuAction.valueOf(source.getText()));
+    
     }
 
     // Returns just the class name -- no package info.
@@ -205,18 +212,19 @@ public class Menu implements ActionListener, ItemListener {
         //Display the window.
         frame.setSize(450, 260);
         frame.setVisible(true);
-        System.out.println("2");
+        System.out.println("GUI created");
     }
 
-    public void setAction(String text){
+    public void setAction(action item){
         // set a global variable based an a menu action so that we can respond approbriately in main run method
-        this.action = text;
+        menuAction = item;
     }
-    public static String getAction(){
+    public Enum getAction(){
         // return the global variable that is based on a menu action so that we can respond approbriately in main run method
-        return action;
+        return menuAction;
     }
 
+/*
     public static void main(String[] args) {
         //Schedule a job for the event-dispatching thread:
         //creating and showing this application's GUI.
@@ -226,4 +234,5 @@ public class Menu implements ActionListener, ItemListener {
             }
         });
     }
+    */
 }
