@@ -27,8 +27,8 @@ public class Menu implements ActionListener, ItemListener {
     JScrollPane scrollPane;
     String newline = "\n";
 
-    enum action {Start_Logger, Exit};
-    action menuAction;
+    public enum action {Start_Logger, Exit, Save};
+    public action menuAction;
 
     public JMenuBar createMenuBar() {
         JMenuBar menuBar;
@@ -139,6 +139,26 @@ public class Menu implements ActionListener, ItemListener {
         return contentPane;
     }
 
+    /**
+     * Create the GUI and show it.  For thread safety,
+     * this method should be invoked from the
+     * event-dispatching thread.
+     */
+    public static void createAndShowGUI() {
+        //Create and set up the window.
+        JFrame frame = new JFrame("Nerdy Logger (JSON)");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        //Create and set up the content pane.
+        Menu demo = new Menu();
+        frame.setJMenuBar(demo.createMenuBar());
+        frame.setContentPane(demo.createContentPane());
+
+        //Display the window.
+        frame.setSize(450, 260);
+        frame.setVisible(true);
+    }
+
     public void actionPerformed(ActionEvent e) {
         JMenuItem source = (JMenuItem)(e.getSource());
         String s = "Action event detected."
@@ -148,15 +168,9 @@ public class Menu implements ActionListener, ItemListener {
         output.append(s + newline);
         output.setCaretPosition(output.getDocument().getLength());
         
-        setAction(menuAction.valueOf(source.getText()));
-        
-        if (source.getText()=="Start_Logger"){
-           // NerdyJSONLog.runLogger();
-           System.out.println("good");
-        }
-        
-        
-        System.out.println("Menu action listner hears: "+getAction().toString());
+        menuAction = menuAction.valueOf(source.getText());
+                
+        menuResponse();
     }
 
     public void itemStateChanged(ItemEvent e) {
@@ -172,8 +186,9 @@ public class Menu implements ActionListener, ItemListener {
         output.append(s + newline);
         output.setCaretPosition(output.getDocument().getLength());
 
-        setAction(menuAction.valueOf(source.getText()));
-    
+        menuAction = menuAction.valueOf(source.getText());
+        
+        menuResponse();
     }
 
     // Returns just the class name -- no package info.
@@ -194,34 +209,22 @@ public class Menu implements ActionListener, ItemListener {
         }
     }
 
-    /**
-     * Create the GUI and show it.  For thread safety,
-     * this method should be invoked from the
-     * event-dispatching thread.
-     */
-    public static void createAndShowGUI() {
-        //Create and set up the window.
-        JFrame frame = new JFrame("Nerdy Logger (JSON)");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-        //Create and set up the content pane.
-        Menu demo = new Menu();
-        frame.setJMenuBar(demo.createMenuBar());
-        frame.setContentPane(demo.createContentPane());
-
-        //Display the window.
-        frame.setSize(450, 260);
-        frame.setVisible(true);
-        System.out.println("GUI created");
-    }
-
-    public void setAction(action item){
-        // set a global variable based an a menu action so that we can respond approbriately in main run method
-        menuAction = item;
-    }
-    public Enum getAction(){
-        // return the global variable that is based on a menu action so that we can respond approbriately in main run method
-        return menuAction;
+    public void menuResponse(){
+    switch(menuAction){
+        case Start_Logger:
+           System.out.println("starting");
+           menuAction = null;
+           break;
+        case Save:
+           //do logic
+           break;
+        case Exit:
+           System.out.println("exiting");
+           System.exit(0);
+           break;
+        default:
+            //do nothing catch all
+    }       
     }
 
 /*
