@@ -27,7 +27,15 @@ public class Menu implements ActionListener, ItemListener {
     JScrollPane scrollPane;
     String newline = "\n";
 
-    public enum action {Start_Logger, Stop_Logger, Exit, Save, Configure_List};
+    public enum action {
+        Start_Logger, 
+        Stop_Logger, 
+        Configure_List, 
+        Logger_true,
+        Exit, 
+        Save, 
+        Connect_To_Server, 
+        Retrieve_Headers};
     public action menuAction;
 
     public JMenuBar createMenuBar() {
@@ -64,6 +72,11 @@ public class Menu implements ActionListener, ItemListener {
         menuItem.addActionListener(this);
         menu.add(menuItem);
         
+        menuItem = new JMenuItem(menuAction.Logger_true.toString(), icon);
+        //menuItem.setMnemonic(KeyEvent.VK_D);
+        menuItem.addActionListener(this);
+        menu.add(menuItem);
+
         menuItem = new JMenuItem(menuAction.Configure_List.toString());
         //menuItem.setMnemonic(KeyEvent.VK_D);
         menuItem.addActionListener(this);
@@ -218,14 +231,30 @@ public class Menu implements ActionListener, ItemListener {
     public void menuResponse(){
     switch(menuAction){
         case Start_Logger:
-           System.out.println("starting");
+           System.out.println("Starting Full Logger");
            menuAction = null;
            NerdyJSONLog.t.start();
            break;
         case Stop_Logger:
            System.out.println("stopping");
            menuAction = null;
-           NerdyJSONLog.t.stop();
+           //NerdyJSONLog.t.interrupt();
+           NerdyJSONLog.Entry[0].setValue(false);
+           break;
+        case Logger_true:
+           System.out.println("truing");
+           menuAction = null;
+           NerdyJSONLog.Entry[0].setValue(true);
+           break;
+        case Connect_To_Server:
+           System.out.println("conecting to server");
+           menuAction = null;
+           //do stuff
+           break;
+        case Retrieve_Headers:
+           System.out.println("retrieving headers");
+           menuAction = null;
+           NerdyJSONLog.retrieveKeys();
            break;
         case Configure_List:
            System.out.println("configuring list??");

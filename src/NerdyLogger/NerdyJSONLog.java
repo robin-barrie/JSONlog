@@ -101,8 +101,8 @@ public class NerdyJSONLog {
 		//**********************************
 		//inst.startClientTeam(2337);  		// team # or use inst.startClient("hostname") or similar
 		//inst.startDSClient();  			// recommended if running on DS computer; this gets the robot IP from the DS
-		//inst.startClient("10.23.37.2");  	//SkillzBot
-		inst.startClient("10.0.1.81");  	//Robin's laptop running simulator
+		inst.startClient("10.23.37.2");  	//SkillzBot
+		//inst.startClient("10.0.1.123");  	//Robin's laptop running glass
 
 			loggerOn = false;	// This value is set to 'true' in Robot.init & then false at Robot.disable.
 		System.out.println("LoggerOn: " + loggerOn + " - waiting on NetworkTables and/or Robot");
@@ -113,9 +113,9 @@ public class NerdyJSONLog {
 		// waiting for the "Logger" entry on the SmartDashboard to read 'true'.
 		while(!loggerOn){
 			loggerOn = Entry[0].getBoolean(false);
-			System.out.print("."); i = i + 1; if(i>100) {System.out.println("-"); i=0;}
+			System.out.print("."); i = i + 1; if(i>500) {System.out.println("-"); i=0;}
 			sleepy();
-		}
+		} 
 
 		retrieveKeys(); //???+++++++++++++++++++++++  need here, after server connects, to get info.  Plan is to deveop menu and use to set up default file for later use
 
@@ -128,7 +128,7 @@ public class NerdyJSONLog {
 		while(loggerOn){				
 			stateSB(); // actual logging of current states
 			sleepy(20);  //pause x milliseconds, 50 by default
-			System.out.print("."); i = i + 1; if(i>100) {System.out.println("-"); i=0;}  //visual indicator its working.  take out in later iterations
+			System.out.print("."); i = i + 1; if(i>1000) {System.out.println("-"); i=0;}  //visual indicator its working.  take out in later iterations
 			loggerOn = Entry[0].getBoolean(false); // check to see if robot is disabled, to end logging.
 			if(!inst.isConnected()) {				// also stop logging if disconnected, like at the end of a match.
 				loggerOn = false;
@@ -268,12 +268,7 @@ public class NerdyJSONLog {
 	 * 
 	 */
 	public static void sleepy(){
-		try {
-			Thread.sleep(50);
-		  } catch (InterruptedException ex) {
-			System.out.println("sleep interrupted");
-			return;
-		  }
+		 sleepy(50); 
 	}
 	public static void sleepy(int milliseconds){
 		try {
@@ -377,10 +372,10 @@ public class NerdyJSONLog {
 		String[] SDSubTablesString = Arrays.copyOf(sdSubTableObject, sdSubTableObject.length, String[].class);
 
 		//Set<String> stKeysSet;
-		// Create ArrayList that will initially hold all the heading names, from the main tbale and all subtables.
+		// Create ArrayList that will initially hold all the heading names, from the main table and all subtables.
 		ArrayList<String> sdFullHeadingList = new ArrayList<String>();
 
-		// For each subtable, retrieve the headings.  Add the subtable name to each heading along with a "/", and then add tht to the ArrayList
+		// For each subtable, retrieve the headings.  Add the subtable name to each heading along with a "/", and then add that to the ArrayList
 		for (String value : SDSubTablesString) {
 			tempTable = inst.getTable("SmartDashboard/"+value);
 			Set<String> stKeysSet = tempTable.getKeys();
